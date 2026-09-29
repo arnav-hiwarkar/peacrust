@@ -1,0 +1,1919 @@
+# Peaclock — complete feature and command reference
+
+Peaclock is a free, open-source terminal application by Octobanana. It is much more than a clock: it combines three timekeeping modes, five display views, extensive terminal styling, live keyboard controls, a built-in command prompt, configurable timers, shell-command execution, and persistent configuration.
+
+![](https://www.google.com/s2/favicons?domain=https://github.com\&sz=32)
+
+GitHub
+
++1
+
+![GitHub - octobanana/peaclock: A responsive and customizable clock, timer, and stopwatch for the terminal. · GitHub](https://images.openai.com/static-rsc-4/H7yENCi61uN8ss8m4KW4X3XwdCJpalIO-5MvEcA3RPhWp-5GRvSjruKBTVBOKFn4XrabbOhdlr-C1fcUVRAoeeAfWLKvdfy_yicXefnb8Da85i644Hx-Md5sFoqDetC6hlMv75XwW6mmiFKQHz902hDUfKUHCIe0lUBW6qAoRTk?purpose=inline)
+
+![GitHub - octobanana/peaclock: A responsive and customizable clock, timer, and stopwatch for the terminal.](https://images.openai.com/static-rsc-4/j_05Cw4TqbtsiMQtbElr6RCSgt4TSZ0IZPI3IS95INsW0hENFQW59igj6izgNceGUtnluGO7613csR1Iz_efql7gpYJxdxae1pAJQ6ebUzxouEfa5kqmQqvJ_fSSfWBZfmX9aLjmKYlykH8fEzVrY9vLXDfoxF0lEBZ4tbjNN8U?purpose=inline)
+
+![Peaclock is a cool terminal-based clock, timer and stop watch](https://images.openai.com/static-rsc-4/wNWZ-9eTO0Ad1NBp3DXhKtrgk-XrRjk_r_8H-adXp7YHfsamwtCtXvJNxnCZDx2dXTJzaOVx6YL4UVo4koBhuCZQZ9mpPKCpbFh8dvwGfqmxqTg_tIx_XEZH2KBVB84wm8VPE7MvzKCWIo2yNt4mdL6vuWgbgija-mgBlUISHNE?purpose=inline)
+
+The reference below is for the original [`octobanana/peaclock`](https://github.com/octobanana/peaclock)  project, not similarly named clock utilities.
+
+## 1. Every main mode
+
+Peaclock separates mode (what time value is being displayed) from view (how it is drawn). This means its three modes can be combined with its different display styles.
+
+![](https://www.google.com/s2/favicons?domain=https://github.com\&sz=32)
+
+GitHub
+
++1
+
+![GitHub - octobanana/peaclock: A responsive and customizable clock, timer, and stopwatch for the terminal. · GitHub](https://images.openai.com/static-rsc-4/H7yENCi61uN8ss8m4KW4X3XwdCJpalIO-5MvEcA3RPhWp-5GRvSjruKBTVBOKFn4XrabbOhdlr-C1fcUVRAoeeAfWLKvdfy_yicXefnb8Da85i644Hx-Md5sFoqDetC6hlMv75XwW6mmiFKQHz902hDUfKUHCIe0lUBW6qAoRTk?purpose=inline)
+
+## 1. Clock mode
+
+Live time
+
+Displays the current time. You can configure 12-hour or 24-hour time, toggle seconds, display a formatted date, and select a timezone and locale.
+
+Keyboard: `w`
+
+## 2. Timer mode
+
+Countdown
+
+Counts down from a configured duration. Start or pause it, clear it, and execute a shell command when the countdown completes—for example, a desktop notification.
+
+Keyboard: `e` · Start/pause: `Space`
+
+## 3. Stopwatch mode
+
+Elapsed time
+
+Measures elapsed time. You can start, stop, and clear it, making it useful for study sessions, coding sprints, or measuring how long a task takes.
+
+Keyboard: `r` · Start/pause: `Space`
+
+## 2. Every display view
+
+The original project documents five view types. These are independent of the clock, timer, and stopwatch modes.
+
+![](https://www.google.com/s2/favicons?domain=https://octobanana.com\&sz=32)
+
+octobanana
+
++1
+
+![GitHub - octobanana/peaclock: A responsive and customizable clock, timer, and stopwatch for the terminal. · GitHub](https://images.openai.com/static-rsc-4/H7yENCi61uN8ss8m4KW4X3XwdCJpalIO-5MvEcA3RPhWp-5GRvSjruKBTVBOKFn4XrabbOhdlr-C1fcUVRAoeeAfWLKvdfy_yicXefnb8Da85i644Hx-Md5sFoqDetC6hlMv75XwW6mmiFKQHz902hDUfKUHCIe0lUBW6qAoRTk?purpose=inline)
+
+Digital — `digital`
+
+A large, block-style digital clock built from terminal characters. Its size, spacing, proportions, colors and character fills are customizable.
+
+Keyboard: `R`
+
+![Peaclock is a cool terminal-based clock, timer and stop watch](https://images.openai.com/static-rsc-4/wNWZ-9eTO0Ad1NBp3DXhKtrgk-XrRjk_r_8H-adXp7YHfsamwtCtXvJNxnCZDx2dXTJzaOVx6YL4UVo4koBhuCZQZ9mpPKCpbFh8dvwGfqmxqTg_tIx_XEZH2KBVB84wm8VPE7MvzKCWIo2yNt4mdL6vuWgbgija-mgBlUISHNE?purpose=inline)
+
+ASCII — `ascii`
+
+Displays time using ASCII-style block characters, with adjustable character dimensions and visual styling.
+
+Keyboard: `E`
+
+![GitHub - octobanana/peaclock: A responsive and customizable clock, timer, and stopwatch for the terminal.](https://images.openai.com/static-rsc-4/j_05Cw4TqbtsiMQtbElr6RCSgt4TSZ0IZPI3IS95INsW0hENFQW59igj6izgNceGUtnluGO7613csR1Iz_efql7gpYJxdxae1pAJQ6ebUzxouEfa5kqmQqvJ_fSSfWBZfmX9aLjmKYlykH8fEzVrY9vLXDfoxF0lEBZ4tbjNN8U?purpose=inline)
+
+Binary — `binary`
+
+Represents the digits of the time as binary bits. The six digit columns represent HH:MM:SS, and the rows represent bit values 8, 4, 2 and 1. Add the lit bits in each column to recover its decimal digit.
+
+Keyboard: `T`
+
+![GitHub - octobanana/peaclock: A responsive and customizable clock, timer, and stopwatch for the terminal. · GitHub](https://images.openai.com/static-rsc-4/QhQZ5ikhqLrUfDo20G9mvDOyeMHpWWo2FJh1vWxqv6bxgEv3gkZ_gjcTq5VyvIamBuKz22A8KSflz4RWvgkzmjtTnpI9lRE0DggW8mXl_7ZIz783xXU3f5V9L7G6z8HALh2AYmarWKGb9Et7ugIRbFKx0yGUe5YRjUFk4-aSIMI?purpose=inline)
+
+Date — `date`
+
+Displays the formatted date/time string instead of the large clock graphic. The format is configurable.
+
+Keyboard: `W`
+
+![GitHub - octobanana/peaclock: A responsive and customizable clock, timer, and stopwatch for the terminal. · GitHub](https://images.openai.com/static-rsc-4/H7yENCi61uN8ss8m4KW4X3XwdCJpalIO-5MvEcA3RPhWp-5GRvSjruKBTVBOKFn4XrabbOhdlr-C1fcUVRAoeeAfWLKvdfy_yicXefnb8Da85i644Hx-Md5sFoqDetC6hlMv75XwW6mmiFKQHz902hDUfKUHCIe0lUBW6qAoRTk?purpose=inline)
+
+Icon — `icon`
+
+An additional compact, icon-oriented display view.
+
+Keyboard: `Y`
+
+Important distinction: date is both a display view and a separately toggleable date display. The project also has a `set date on/off` command, so you can configure the date independently of the main view.
+
+
+## 3. Complete keyboard shortcut reference
+
+These are the documented default keybindings. Lowercase and uppercase letters often perform different actions.
+
+### Basic controls
+
+|
+Key
+
+|
+
+Function
+
+|
+| --- | --- |
+|
+
+`q` or `Q`
+
+|
+
+Quit Peaclock
+
+|
+|
+
+`Ctrl+C`
+
+|
+
+Quit the program
+
+|
+|
+
+`:`
+
+|
+
+Open the built-in command prompt
+
+|
+|
+
+`Esc`
+
+|
+
+Clear the prompt's status message
+
+|
+|
+
+`Space`
+
+|
+
+Start/stop the timer or stopwatch
+
+|
+|
+
+`Backspace`
+
+|
+
+Clear the timer or stopwatch
+
+|
+
+### Switch modes and views
+
+|
+Key
+
+|
+
+Function
+
+|
+| --- | --- |
+|
+
+`w`
+
+|
+
+Clock mode
+
+|
+|
+
+`e`
+
+|
+
+Timer mode
+
+|
+|
+
+`r`
+
+|
+
+Stopwatch mode
+
+|
+|
+
+`W`
+
+|
+
+Date view
+
+|
+|
+
+`E`
+
+|
+
+ASCII view
+
+|
+|
+
+`R`
+
+|
+
+Digital view
+
+|
+|
+
+`T`
+
+|
+
+Binary view
+
+|
+|
+
+`Y`
+
+|
+
+Icon view
+
+|
+
+### Time and layout toggles
+
+|
+Key
+
+|
+
+Function
+
+|
+| --- | --- |
+|
+
+`a`
+
+|
+
+Toggle 12-hour / 24-hour time
+
+|
+|
+
+`s`
+
+|
+
+Toggle seconds
+
+|
+|
+
+`d`
+
+|
+
+Toggle date display
+
+|
+|
+
+`f`
+
+|
+
+Toggle automatic terminal-filling size
+
+|
+|
+
+`g`
+
+|
+
+Toggle automatic aspect-ratio sizing
+
+|
+
+### Choose what you want to customize
+
+These keys select a property for interactive adjustment:
+
+|
+Key
+
+|
+
+Property
+
+|
+| --- | --- |
+|
+
+`u`
+
+|
+
+Aspect ratio
+
+|
+|
+
+`i`
+
+|
+
+Margin
+
+|
+|
+
+`o`
+
+|
+
+Padding
+
+|
+|
+
+`p`
+
+|
+
+Block size
+
+|
+|
+
+`x`
+
+|
+
+Active foreground color
+
+|
+|
+
+`c`
+
+|
+
+Inactive foreground color
+
+|
+|
+
+`v`
+
+|
+
+Colon foreground color
+
+|
+|
+
+`b`
+
+|
+
+Active background color
+
+|
+|
+
+`n`
+
+|
+
+Inactive background color
+
+|
+|
+
+`m`
+
+|
+
+Colon background color
+
+|
+|
+
+`,`
+
+|
+
+Overall background
+
+|
+|
+
+`.`
+
+|
+
+Date text color
+
+|
+
+Once you've selected a property, the following keys adjust it:
+
+|
+Key
+
+|
+
+Function
+
+|
+| --- | --- |
+|
+
+`h`
+
+|
+
+Decrease horizontal value or hue
+
+|
+|
+
+`l`
+
+|
+
+Increase horizontal value or hue
+
+|
+|
+
+`j`
+
+|
+
+Decrease vertical value or saturation
+
+|
+|
+
+`k`
+
+|
+
+Increase vertical value or saturation
+
+|
+|
+
+`;`
+
+|
+
+Decrease luminosity
+
+|
+|
+
+`'`
+
+|
+
+Increase luminosity
+
+|
+|
+
+`/`
+
+|
+
+Clear the toggled style
+
+|
+
+For example, pressing `x` selects the active foreground color. You can then use `h`, `j`, `k`, `l`, `;` and `'` to adjust its hue, saturation and luminosity interactively.
+
+These mappings are documented in Peaclock's [official help reference](https://octobanana.com/software/peaclock/blob/doc/help.txt) .
+
+![](https://www.google.com/s2/favicons?domain=https://octobanana.com\&sz=32)
+
+octobanana
+
+## 4. The built-in command prompt
+
+Press `:` while Peaclock is running to enter commands without restarting the program. This is where its more extensive configuration functionality lives.
+
+### Prompt navigation and editing
+
+|
+Key
+
+|
+
+Function
+
+|
+| --- | --- |
+|
+
+`Enter`
+
+|
+
+Submit the command
+
+|
+|
+
+`Esc` or `Ctrl+C`
+
+|
+
+Exit the prompt
+
+|
+|
+
+`Ctrl+U`
+
+|
+
+Clear the entire input
+
+|
+|
+
+`Up` or `Ctrl+P`
+
+|
+
+Previous matching history entry
+
+|
+|
+
+`Down` or `Ctrl+N`
+
+|
+
+Next matching history entry
+
+|
+|
+
+`Left` or `Ctrl+B`
+
+|
+
+Move the cursor left
+
+|
+|
+
+`Right` or `Ctrl+F`
+
+|
+
+Move the cursor right
+
+|
+|
+
+`Home` or `Ctrl+A`
+
+|
+
+Move to the beginning
+
+|
+|
+
+`End` or `Ctrl+E`
+
+|
+
+Move to the end
+
+|
+|
+
+`Delete` or `Ctrl+D`
+
+|
+
+Delete the character under the cursor; at the end, delete the previous character
+
+|
+|
+
+`Backspace` or `Ctrl+H`
+
+|
+
+Delete the previous character
+
+|
+
+### Command history
+
+Peaclock provides:
+
+* Persistent command history saved to a file.
+
+* History navigation while typing.
+
+* Fuzzy history search, allowing you to find previous commands based on the current input rather than relying only on sequential browsing.
+
+### Built-in utility commands
+
+|
+Command
+
+|
+
+Purpose
+
+|
+| --- | --- |
+|
+
+`help`
+
+|
+
+View help
+
+|
+|
+
+`help timer`
+
+|
+
+Search help for a topic or command
+
+|
+|
+
+`quit`
+
+|
+
+Quit the application
+
+|
+|
+
+`exit`
+
+|
+
+Quit the application
+
+|
+|
+
+`mkconfig file`
+
+|
+
+Write the current configuration to a file
+
+|
+|
+
+`mkconfig! file`
+
+|
+
+Create or overwrite a file with the current configuration
+
+|
+
+The help command accepts a search term, so you can inspect the application's built-in documentation from inside the running clock. The `mkconfig` commands are particularly useful for saving a customized setup.
+
+![](https://www.google.com/s2/favicons?domain=https://octobanana.com\&sz=32)
+
+octobanana
+
+## 5. Timer and stopwatch functions in detail
+
+These are separate timekeeping systems, each with its own commands.
+
+## Timer commands
+
+Run these in the prompt after pressing `:`.
+
+Set a ten-minute timer
+
+timer 10m:0s
+
+Copy command
+
+<table class="_6IUVGW_Table" data-d-column-sizing="auto" data-d-dividers="" style="table-layout: auto;"><tbody><tr data-d-component="table-row"><td data-d-component="table-cell" data-d-valign="start"><p class="w6asjq_TextBase _85PZeG_Text" data-d-component="text"><code class="er4J8W_Code" data-d-component="code">timer start</code></p></td><td data-d-component="table-cell" data-d-valign="start">Start or resume the countdown.</td></tr><tr data-d-component="table-row"><td data-d-component="table-cell" data-d-valign="start"><p class="w6asjq_TextBase _85PZeG_Text" data-d-component="text"><code class="er4J8W_Code" data-d-component="code">timer stop</code></p></td><td data-d-component="table-cell" data-d-valign="start">Stop the countdown.</td></tr><tr data-d-component="table-row"><td data-d-component="table-cell" data-d-valign="start"><p class="w6asjq_TextBase _85PZeG_Text" data-d-component="text"><code class="er4J8W_Code" data-d-component="code">timer clear</code></p></td><td data-d-component="table-cell" data-d-valign="start">Reset to the configured initial duration.</td></tr><tr data-d-component="table-row"><td data-d-component="table-cell" data-d-valign="start"><p class="w6asjq_TextBase _85PZeG_Text" data-d-component="text"><code class="er4J8W_Code" data-d-component="code">timer 00h:00m:00s</code></p></td><td data-d-component="table-cell" data-d-valign="start">Set the initial duration; replace the example with your desired duration.</td></tr><tr data-d-component="table-row"><td data-d-component="table-cell" data-d-valign="start"><p class="w6asjq_TextBase _85PZeG_Text" data-d-component="text"><code class="er4J8W_Code" data-d-component="code">timer-exec 'command'</code></p></td><td data-d-component="table-cell" data-d-valign="start">Set a shell command to execute on completion.</td></tr></tbody></table>
+
+## Stopwatch commands
+
+<table class="_6IUVGW_Table" data-d-column-sizing="auto" data-d-dividers="" style="table-layout: auto;"><tbody><tr data-d-component="table-row"><td data-d-component="table-cell" data-d-valign="start"><p class="w6asjq_TextBase _85PZeG_Text" data-d-component="text"><code class="er4J8W_Code" data-d-component="code">stopwatch start</code></p></td><td data-d-component="table-cell" data-d-valign="start">Start or resume elapsed-time measurement.</td></tr><tr data-d-component="table-row"><td data-d-component="table-cell" data-d-valign="start"><p class="w6asjq_TextBase _85PZeG_Text" data-d-component="text"><code class="er4J8W_Code" data-d-component="code">stopwatch stop</code></p></td><td data-d-component="table-cell" data-d-valign="start">Stop the stopwatch.</td></tr><tr data-d-component="table-row"><td data-d-component="table-cell" data-d-valign="start"><p class="w6asjq_TextBase _85PZeG_Text" data-d-component="text"><code class="er4J8W_Code" data-d-component="code">stopwatch clear</code></p></td><td data-d-component="table-cell" data-d-valign="start">Clear the stopwatch.</td></tr><tr data-d-component="table-row"><td data-d-component="table-cell" data-d-valign="start"><p class="w6asjq_TextBase _85PZeG_Text" data-d-component="text"><code class="er4J8W_Code" data-d-component="code">stopwatch 00h:00m:00s</code></p></td><td data-d-component="table-cell" data-d-valign="start">Set the initial starting time.</td></tr></tbody></table>
+
+### Run a command when a timer finishes
+
+One of Peaclock's more useful features is `timer-exec`. For example, its sample configurations use a notification command:
+
+Bash
+
+```
+timer-exec 'notify-send -a peaclock "timer complete"'
+```
+
+This allows a countdown to trigger a shell command when it completes. What happens depends on the command you configure and the programs available on your system. The example uses `notify-send`, commonly associated with Linux desktop notifications; it is not a universal macOS notification command.
+
+You can also clear the configured action by setting its value to an empty string.
+
+![](https://www.google.com/s2/favicons?domain=https://octobanana.com\&sz=32)
+
+octobanana
+
++1
+
+
+## 6. Every configuration command
+
+Peaclock exposes a fairly large set of commands. You can use them interactively or place them in a configuration file, one command per line.
+
+### A. Mode, view and regional settings
+
+|
+Command
+
+|
+
+What it configures
+
+|
+| --- | --- |
+|
+
+`mode clock`
+
+|
+
+Current-time mode
+
+|
+|
+
+`mode timer`
+
+|
+
+Countdown mode
+
+|
+|
+
+`mode stopwatch`
+
+|
+
+Elapsed-time mode
+
+|
+|
+
+`view date`
+
+|
+
+Date-only view
+
+|
+|
+
+`view ascii`
+
+|
+
+ASCII clock view
+
+|
+|
+
+`view digital`
+
+|
+
+Digital clock view
+
+|
+|
+
+`view binary`
+
+|
+
+Binary clock view
+
+|
+|
+
+`view icon`
+
+|
+
+Icon view
+
+|
+|
+
+`locale 'en_CA.utf8'`
+
+|
+
+Locale-sensitive date/time formatting
+
+|
+|
+
+`timezone 'America/Vancouver'`
+
+|
+
+Timezone used for time display
+
+|
+|
+
+`date '%a %b %d %p'`
+
+|
+
+Date/time format string
+
+|
+
+Locale and timezone examples above are illustrative. The selected locale and timezone must be supported by the system. An empty string clears the configured value.
+
+### B. Display dimensions and geometry
+
+![GitHub - octobanana/peaclock: A responsive and customizable clock, timer, and stopwatch for the terminal. · GitHub](https://images.openai.com/static-rsc-4/H7yENCi61uN8ss8m4KW4X3XwdCJpalIO-5MvEcA3RPhWp-5GRvSjruKBTVBOKFn4XrabbOhdlr-C1fcUVRAoeeAfWLKvdfy_yicXefnb8Da85i644Hx-Md5sFoqDetC6hlMv75XwW6mmiFKQHz902hDUfKUHCIe0lUBW6qAoRTk?purpose=inline)
+
+These commands control how much terminal space the clock occupies.
+
+|
+Command
+
+|
+
+Function
+
+|
+| --- | --- |
+|
+
+`block x y`
+
+|
+
+Set the width and height of each clock block
+
+|
+|
+
+`block-x x`
+
+|
+
+Set block width independently
+
+|
+|
+
+`block-y y`
+
+|
+
+Set block height independently
+
+|
+|
+
+`padding x y`
+
+|
+
+Set horizontal and vertical spacing between blocks
+
+|
+|
+
+`padding-x x`
+
+|
+
+Set horizontal padding
+
+|
+|
+
+`padding-y y`
+
+|
+
+Set vertical padding
+
+|
+|
+
+`margin x y`
+
+|
+
+Set the outer margin
+
+|
+|
+
+`margin-x x`
+
+|
+
+Set horizontal outer margin
+
+|
+|
+
+`margin-y y`
+
+|
+
+Set vertical outer margin
+
+|
+|
+
+`ratio x y`
+
+|
+
+Set the target aspect ratio
+
+|
+|
+
+`ratio-x x`
+
+|
+
+Set the horizontal ratio component
+
+|
+|
+
+`ratio-y y`
+
+|
+
+Set the vertical ratio component
+
+|
+|
+
+`date-padding n`
+
+|
+
+Set the spacing between the date and clock
+
+|
+
+The `x` and `y` values are placeholders for numeric values, not literal characters to type.
+
+Automatic sizing has two distinct behaviors:
+
+* `set auto-size on` — automatically sizes the clock to fill the available terminal area.
+
+* `set auto-ratio on` — sizes the clock to fit a specified aspect ratio, using `ratio x y`.
+
+Both override the normal manually configured block dimensions. Auto-ratio also takes precedence over auto-size, according to the documented help.
+
+![](https://www.google.com/s2/favicons?domain=https://octobanana.com\&sz=32)
+
+octobanana
+
++1
+
+### C. Display toggles
+
+Use `set` to turn features on or off.
+
+|
+Command
+
+|
+
+Function
+
+|
+| --- | --- |
+|
+
+`set hour-24 on`
+
+|
+
+Use 24-hour time
+
+|
+|
+
+`set hour-24 off`
+
+|
+
+Use 12-hour time
+
+|
+|
+
+`set seconds on`
+
+|
+
+Show seconds
+
+|
+|
+
+`set seconds off`
+
+|
+
+Hide seconds
+
+|
+|
+
+`set date on`
+
+|
+
+Show the date
+
+|
+|
+
+`set date off`
+
+|
+
+Hide the date
+
+|
+|
+
+`set auto-size on`
+
+|
+
+Fill the terminal automatically
+
+|
+|
+
+`set auto-size off`
+
+|
+
+Disable automatic terminal filling
+
+|
+|
+
+`set auto-ratio on`
+
+|
+
+Enable aspect-ratio-based sizing
+
+|
+|
+
+`set auto-ratio off`
+
+|
+
+Disable aspect-ratio-based sizing
+
+|
+
+### D. Character fills
+
+Peaclock lets you choose the strings used to draw different parts of the clock.
+
+|
+Command
+
+|
+
+Controls
+
+|
+| --- | --- |
+|
+
+`fill 'text'`
+
+|
+
+Default fill for active, inactive and colon blocks
+
+|
+|
+
+`fill-active 'text'`
+
+|
+
+Active digit blocks
+
+|
+|
+
+`fill-inactive 'text'`
+
+|
+
+Inactive digit blocks
+
+|
+|
+
+`fill-colon 'text'`
+
+|
+
+Colon/separator blocks
+
+|
+
+For example, the fill does not have to be a conventional solid block character. You can experiment with different characters or short strings to change the clock's visual texture. Use an empty string to clear a fill override.
+
+### E. Refresh and input timing
+
+|
+Command
+
+|
+
+Function
+
+|
+| --- | --- |
+|
+
+`rate-input milliseconds`
+
+|
+
+Interval between input-reading cycles
+
+|
+|
+
+`rate-refresh milliseconds`
+
+|
+
+Interval between screen redraws
+
+|
+|
+
+`rate-status milliseconds`
+
+|
+
+Duration for displaying status messages
+
+|
+
+These are runtime tuning options rather than clock alarms. For example, the sample configurations use different refresh intervals depending on the visual style. Very frequent redraws can increase terminal activity; they aren't necessary for every setup.
+
+## 7. Complete color and styling system
+
+This is one of Peaclock's most configurable areas. It supports 4-bit, 8-bit and 24-bit colors, plus reverse styling and clearing a style.
+
+![](https://www.google.com/s2/favicons?domain=https://octobanana.com\&sz=32)
+
+octobanana
+
++1
+
+### Color formats
+
+4-bit terminal colors
+
+Eight standard colors, with bright variants.
+
+`red`, `green`, `blue`, `yellow`, `magenta`, `cyan`, `black`, `white` — each also supports a `bright` variant.
+
+8-bit colors
+
+A numbered terminal palette.
+
+Specify a color index from `0` through `255`.
+
+24-bit true color
+
+Specify an RGB-like hexadecimal color.
+
+Examples: `#000`, `#fff`, `#000000`, `#ffffff`.
+
+### Every style target
+
+The command syntax is:
+
+```
+style <target> <colour-or-style>
+```
+
+|
+Target
+
+|
+
+What it affects
+
+|
+| --- | --- |
+|
+
+`active-fg`
+
+|
+
+Foreground of active clock blocks
+
+|
+|
+
+`inactive-fg`
+
+|
+
+Foreground of inactive clock blocks
+
+|
+|
+
+`colon-fg`
+
+|
+
+Foreground of colon blocks
+
+|
+|
+
+`active-bg`
+
+|
+
+Background of active blocks
+
+|
+|
+
+`inactive-bg`
+
+|
+
+Background of inactive blocks
+
+|
+|
+
+`colon-bg`
+
+|
+
+Background of colon blocks
+
+|
+|
+
+`background`
+
+|
+
+Overall clock background
+
+|
+|
+
+`date`
+
+|
+
+Date text
+
+|
+|
+
+`text`
+
+|
+
+Text in the command prompt
+
+|
+|
+
+`prompt`
+
+|
+
+The prompt symbol at the start of the input line
+
+|
+|
+
+`success`
+
+|
+
+Successful-command status messages
+
+|
+|
+
+`error`
+
+|
+
+Error status messages
+
+|
+
+Supported style values include the documented color formats, `reverse`, and `clear`.
+
+For example:
+
+```
+style active-fg #7c3aed
+style inactive-fg #4b5563
+style background #000000
+style date #ffffff
+```
+
+These examples illustrate the syntax; exact visual output depends on the terminal's color support and the chosen clock configuration.
+
+### Interactive color adjustment
+
+You don't have to type every color value manually. Select a style target using its keyboard shortcut, then adjust hue, saturation and luminosity using the mapped keys described in Section 3.
+
+## 8. Configuration files and startup presets
+
+Peaclock reads commands from a plain-text configuration file. This means you can make a personalized clock setup persistent across launches.
+
+## Default file locations
+
+Configuration directory
+
+~/.peaclock/
+
+Configuration file
+
+~/.peaclock/config
+
+Command history
+
+~/.peaclock/history/command
+
+The directory and configuration file must be created by the user. Lines beginning with `#` are comments, and each command must be on its own line.
+
+### Official example configurations
+
+The repository includes seven named example configurations:
+
+`default`
+
+The default configuration.
+
+View
+
+`octobanana`
+
+An alternative author-designed style.
+
+View
+
+`{item.name}`
+
+Digital clock styling.
+
+View
+
+`{item.name}`
+
+An alternative digital styling preset.
+
+View
+
+`{item.name}`
+
+Binary clock styling.
+
+View
+
+`{item.name}`
+
+An alternative binary styling preset.
+
+View
+
+`{item.name}`
+
+Binary clock using Unicode-oriented styling.
+
+View
+
+The names describe the example presets; each preset is simply a configuration file containing ordinary Peaclock commands, not a separate executable mode. The repository is the source for the actual settings.
+
+![](https://www.google.com/s2/favicons?domain=https://github.com\&sz=32)
+
+GitHub
+
++3
+
+
+## 9. Command-line options
+
+These options are used when launching Peaclock from your shell, rather than inside its running interface.
+
+|
+Command
+
+|
+
+Function
+
+|
+| --- | --- |
+|
+
+`peaclock`
+
+|
+
+Launch with the default initialization
+
+|
+|
+
+`peaclock --help`
+
+|
+
+Print the help reference
+
+|
+|
+
+`peaclock -h`
+
+|
+
+Short form of help
+
+|
+|
+
+`peaclock --version`
+
+|
+
+Display the version
+
+|
+|
+
+`peaclock -v`
+
+|
+
+Short form of version
+
+|
+|
+
+`peaclock --license`
+
+|
+
+Display the license
+
+|
+|
+
+`peaclock --config path/to/config`
+
+|
+
+Initialize from a specific configuration file
+
+|
+|
+
+`peaclock -u path/to/config`
+
+|
+
+Short form of the config-file option
+
+|
+|
+
+`peaclock --config-dir path/to/dir`
+
+|
+
+Use a different configuration directory
+
+|
+|
+
+`peaclock --config NONE`
+
+|
+
+Skip normal initialization commands from a config file
+
+|
+|
+
+`peaclock --config-dir NONE`
+
+|
+
+Skip directory-based initialization
+
+|
+|
+
+`peaclock --colour on`
+
+|
+
+Force color in program-information output
+
+|
+|
+
+`peaclock --colour off`
+
+|
+
+Disable color in program-information output
+
+|
+|
+
+`peaclock --colour auto`
+
+|
+
+Detect whether standard output is a terminal
+
+|
+
+The `--colour` option controls color in program-information output; don't confuse it with the runtime `style` commands that customize the clock itself. The optional positional configuration-file argument is also documented in the usage syntax.
+
+Reference: [Official command-line help](https://octobanana.com/software/peaclock/blob/doc/help.txt) .
+
+![](https://www.google.com/s2/favicons?domain=https://octobanana.com\&sz=32)
+
+octobanana
+
+## 10. What else does Peaclock provide?
+
+Beyond the main modes and commands, these are the other documented capabilities.
+
+Responsive terminal layout
+
+Automatically adapts to terminal dimensions, or uses a chosen aspect ratio to prevent the clock from looking stretched.
+
+Locale-aware date and time
+
+Configurable locale, timezone and date-format string.
+
+Runtime customization
+
+Change the mode, view, dimensions, colors, display options and timer settings while the application is running.
+
+Persistent command history
+
+Save past commands, navigate matching history entries and use fuzzy searching.
+
+Timer completion actions
+
+Execute a configured shell command when a countdown finishes.
+
+Portable, text-based configuration
+
+Store settings in a file, maintain reusable presets and export the current configuration using `mkconfig`.
+
+The original project documents support for Linux, BSD and macOS. It uses terminal control sequences for cursor movement, styling and screen clearing, so the exact rendering can vary with terminal compatibility.
+
+![](https://www.google.com/s2/favicons?domain=https://github.com\&sz=32)
+
+GitHub
+
++1
+
+## 11. What Peaclock does not document as a built-in feature
+
+It's useful to distinguish Peaclock's actual functionality from features that other terminal productivity tools might offer.
+
+|
+Capability
+
+|
+
+Status in the documented original
+
+|
+| --- | --- |
+|
+
+Current local/system time
+
+|
+
+Yes
+
+|
+|
+
+Countdown timer
+
+|
+
+Yes
+
+|
+|
+
+Stopwatch
+
+|
+
+Yes
+
+|
+|
+
+Binary clock
+
+|
+
+Yes
+
+|
+|
+
+Custom date formatting
+
+|
+
+Yes
+
+|
+|
+
+Timer-triggered shell command
+
+|
+
+Yes
+
+|
+|
+
+Timezone selection
+
+|
+
+Yes
+
+|
+|
+
+Multiple named alarms with scheduled times
+
+|
+
+Not documented
+
+|
+|
+
+Multiple concurrent timers
+
+|
+
+Not documented
+
+|
+|
+
+Pomodoro work/break cycle manager
+
+|
+
+Not documented
+
+|
+|
+
+Calendar or event scheduling
+
+|
+
+Not documented
+
+|
+|
+
+World-clock dashboard with multiple timezones simultaneously
+
+|
+
+Not documented
+
+|
+|
+
+System monitoring, weather or network statistics
+
+|
+
+Not documented
+
+|
+|
+
+Built-in task list or reminders manager
+
+|
+
+Not documented
+
+|
+|
+
+Dedicated graphical interface
+
+|
+
+No; it is a terminal application
+
+|
+
+“Not documented” means the feature isn't part of the documented built-in interface; you could potentially approximate some behavior with external scripts and shell commands.
+
+## 12. Interactive feature checklist
+
+If you're evaluating Peaclock for your own terminal setup, here's a compact checklist of its capabilities.
+
+## Feature inventory
+
+0/35
+
+Timekeeping
+
+Live clock
+
+Countdown timer
+
+Stopwatch
+
+Start, stop and clear controls
+
+Configurable initial timer duration
+
+Timer completion shell command
+
+Display
+
+ASCII view
+
+Digital view
+
+Binary view
+
+Date view
+
+Icon view
+
+12/24-hour format
+
+Show/hide seconds
+
+Show/hide date
+
+Locale and timezone selection
+
+Custom date format
+
+Layout and appearance
+
+Automatic terminal sizing
+
+Aspect-ratio sizing
+
+Block dimensions
+
+Padding and margins
+
+Date-to-clock spacing
+
+Active/inactive digit styling
+
+Separate colon styling
+
+Foreground and background colors
+
+4-bit, 8-bit and 24-bit colors
+
+Custom character fills
+
+Interactive hue, saturation and luminosity adjustment
+
+Workflow and configuration
+
+Built-in command prompt
+
+Command history persistence
+
+Fuzzy history search
+
+Configuration files
+
+Save current settings with mkconfig
+
+Help search
+
+Startup configuration overrides
+
+Custom refresh/input/status intervals
+
+Reset checklist
+
+## Official references
+
+* ![](https://www.google.com/s2/favicons?domain=https://github.com\&sz=32)
+
+  GitHub repository
+
+  Source code, README and configuration presets
+
+  Open
+
+* Full command help
+
+  Every documented shortcut, prompt command and CLI option
+
+  Open
+
+* Configuration examples
+
+  Seven example presets to inspect or adapt
+
+  Open
+
+Bottom line: Peaclock is a highly configurable terminal clock with three timekeeping modes, five views, interactive styling, persistent configuration, searchable command history and timer-triggered shell actions. Its strength is its flexible visual presentation and keyboard-driven interface, rather than being a complete alarm, calendar or time-management suite.
+

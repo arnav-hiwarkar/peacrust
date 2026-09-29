@@ -1,9 +1,12 @@
 # peacrust default look · created by Hiwarkar
 view digital
-set auto-size on
+set auto-ratio on
+ratio 2 1
+padding 0 0
 set date on
 set seconds on
-fill-inactive ''
+fill-inactive '░'
+style inactive-fg bright-black
 style active-fg blue
 style colon-fg blue
 style date bright-white

@@ -1,4 +1,4 @@
-use crate::cava::{self, Cava};
+use crate::cava::Cava;
 use crate::clock::{self, Counter};
 use crate::color;
 use crate::command::{self, Action, CounterOp};
@@ -27,7 +27,7 @@ pub enum Select {
 pub enum CavaState {
     Off,
     Running(Cava),
-    Failed(&'static str),
+    Failed(String),
 }
 
 pub struct App {
@@ -128,7 +128,7 @@ impl App {
         if let CavaState::Running(c) = &self.cava
             && !c.alive()
         {
-            self.cava = CavaState::Failed(cava::EXITED);
+            self.cava = CavaState::Failed(c.exit_message());
         }
     }
 
@@ -162,7 +162,7 @@ impl App {
             self.cava = CavaState::Off;
             self.cava = match Cava::spawn(&self.cava_bin, self.cfg.cava_bars) {
                 Ok(c) => CavaState::Running(c),
-                Err(e) => CavaState::Failed(e),
+                Err(e) => CavaState::Failed(e.to_string()),
             };
         }
     }

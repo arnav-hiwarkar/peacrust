@@ -82,7 +82,7 @@ fn toggles_change_the_readout() {
     press(&mut app, "dfg", t);
     assert_eq!(
         [Toggle::Date, Toggle::AutoSize, Toggle::AutoRatio].map(|x| app.cfg.on(x)),
-        [false, false, true]
+        [false, true, false]
     );
 }
 
@@ -336,4 +336,31 @@ fn cava_bars_flow_from_child_to_screen() {
     press(&mut app, "z", t);
     assert!(matches!(app.cava, CavaState::Off));
     assert!(!conf.exists());
+}
+
+#[test]
+fn cava_failure_shows_its_error() {
+    let dir = tmp("cava-fail");
+    let fake = dir.join("cava");
+    std::fs::write(&fake, "#!/bin/sh\necho 'no capture device' >&2\nexit 1\n").unwrap();
+    std::process::Command::new("chmod")
+        .arg("+x")
+        .arg(&fake)
+        .status()
+        .unwrap();
+    let t = Instant::now();
+    let mut app = App::new(None);
+    app.cava_bin = fake.display().to_string();
+    press(&mut app, "z", t);
+    let deadline = Instant::now() + Duration::from_secs(3);
+    while app.animating() && Instant::now() < deadline {
+        std::thread::sleep(Duration::from_millis(20));
+        app.tick(t);
+    }
+    std::thread::sleep(Duration::from_millis(100));
+    let CavaState::Failed(msg) = &app.cava else {
+        panic!("cava still running")
+    };
+    assert_eq!(msg, "cava exited: no capture device");
+    assert!(screen(&app, t).contains("cava exited: no capture device"));
 }

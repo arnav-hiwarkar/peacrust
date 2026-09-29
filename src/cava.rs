@@ -7,12 +7,46 @@ use std::sync::{Arc, Mutex};
 pub const NOT_FOUND: &str = "cava not found · run peacrust --install-cava";
 pub const EXITED: &str = "cava exited";
 
-pub fn config_text(bars: u16) -> String {
+/// cava config for raw ascii bars on stdout. `input` is the user's own `[input]` section, if any.
+pub fn config_text(bars: u16, input: &str) -> String {
+    let input = match input {
+        "" if cfg!(target_os = "macos") => "[input]\nmethod = portaudio\nsource = auto\n",
+        s => s,
+    };
     format!(
-        "[general]\nbars = {bars}\nframerate = 60\n\n[output]\nmethod = raw\nraw_target = /dev/stdout\n\
+        "{input}\n[general]\nbars = {bars}\nframerate = 60\n\n[output]\nmethod = raw\nraw_target = /dev/stdout\n\
          data_format = ascii\nascii_max_range = 1000\nbar_delimiter = 59\nframe_delimiter = 10\n\
          channels = mono\nmono_option = average\n"
     )
+}
+
+/// The `[input]` section of a cava config, without comments, so the user's audio source is kept.
+pub fn input_section(conf: &str) -> String {
+    let mut out = String::new();
+    let mut inside = false;
+    for line in conf.lines().map(str::trim) {
+        if line.starts_with('[') {
+            inside = line == "[input]";
+        }
+        if inside && !line.is_empty() && !line.starts_with(['#', ';']) {
+            out.push_str(line);
+            out.push('\n');
+        }
+    }
+    if out.lines().count() > 1 {
+        out
+    } else {
+        String::new()
+    }
+}
+
+fn user_input_section() -> String {
+    let dir = std::env::var_os("XDG_CONFIG_HOME")
+        .filter(|v| !v.is_empty())
+        .map(PathBuf::from)
+        .or_else(|| std::env::var_os("HOME").map(|h| PathBuf::from(h).join(".config")));
+    let text = dir.and_then(|d| std::fs::read_to_string(d.join("cava/config")).ok());
+    input_section(&text.unwrap_or_default())
 }
 
 /// One raw ascii frame, e.g. `12;400;1000;`. Malformed frames are dropped.
@@ -31,6 +65,7 @@ pub struct Cava {
     conf: PathBuf,
     frame: Arc<Mutex<Vec<u16>>>,
     dead: Arc<AtomicBool>,
+    err: Arc<Mutex<String>>,
     pub bars: u16,
 }
 
@@ -40,13 +75,13 @@ impl Cava {
         let n = SPAWNS.fetch_add(1, Ordering::Relaxed);
         let conf =
             std::env::temp_dir().join(format!("peacrust-cava-{}-{n}.conf", std::process::id()));
-        std::fs::write(&conf, config_text(bars)).map_err(|_| EXITED)?;
+        std::fs::write(&conf, config_text(bars, &user_input_section())).map_err(|_| EXITED)?;
         let spawned = Command::new(bin)
             .arg("-p")
             .arg(&conf)
             .stdin(Stdio::null())
             .stdout(Stdio::piped())
-            .stderr(Stdio::null())
+            .stderr(Stdio::piped())
             .spawn();
         let mut child = match spawned {
             Ok(c) => c,
@@ -62,6 +97,18 @@ impl Cava {
         let frame = Arc::new(Mutex::new(Vec::new()));
         let dead = Arc::new(AtomicBool::new(false));
         let out = child.stdout.take().ok_or(EXITED)?;
+        let err = Arc::new(Mutex::new(String::new()));
+        let err_reader = child.stderr.take().map(|stderr| {
+            let e = err.clone();
+            std::thread::spawn(move || {
+                for line in BufReader::new(stderr).lines().map_while(Result::ok) {
+                    let clean: String = line.chars().filter(|c| !c.is_control()).collect();
+                    if !clean.trim().is_empty() {
+                        *e.lock().unwrap_or_else(|e| e.into_inner()) = clean.trim().to_string();
+                    }
+                }
+            })
+        });
         let (f, d) = (frame.clone(), dead.clone());
         std::thread::spawn(move || {
             for line in BufReader::new(out).lines() {
@@ -70,6 +117,9 @@ impl Cava {
                     *f.lock().unwrap_or_else(|e| e.into_inner()) = bars;
                 }
             }
+            if let Some(h) = err_reader {
+                let _ = h.join();
+            }
             d.store(true, Ordering::Relaxed);
         });
         Ok(Cava {
@@ -77,6 +127,7 @@ impl Cava {
             conf,
             frame,
             dead,
+            err,
             bars,
         })
     }
@@ -87,6 +138,14 @@ impl Cava {
 
     pub fn conf(&self) -> &Path {
         &self.conf
+    }
+
+    /// Why cava stopped, from the last line it printed to stderr.
+    pub fn exit_message(&self) -> String {
+        match self.err.lock().unwrap_or_else(|e| e.into_inner()).as_str() {
+            "" => EXITED.to_string(),
+            e => format!("{EXITED}: {e}"),
+        }
     }
 
     pub fn alive(&self) -> bool {
@@ -181,12 +240,24 @@ mod tests {
 
     #[test]
     fn config_requests_raw_ascii_bars() {
-        let t = config_text(48);
+        let t = config_text(48, "[input]\nmethod = pulse\nsource = auto\n");
+        assert!(t.starts_with("[input]\nmethod = pulse\n"));
         assert!(
             t.contains("bars = 48\n")
                 && t.contains("method = raw\n")
                 && t.contains("data_format = ascii\n")
         );
+    }
+
+    #[test]
+    fn keeps_only_the_input_section() {
+        let conf = "[general]\nbars = 3\n[input]\n; method = alsa\nmethod = pulse\nsource = auto\n\n[output]\nmethod = ncurses\n";
+        assert_eq!(
+            input_section(conf),
+            "[input]\nmethod = pulse\nsource = auto\n"
+        );
+        assert_eq!(input_section("[input]\n; all commented\n"), "");
+        assert_eq!(input_section(""), "");
     }
 
     #[test]

@@ -97,7 +97,9 @@ pub struct Scene<'a> {
 }
 
 fn fits(n: u32, cells: u32, pad: u32, avail: u32) -> bool {
-    n * cells + n.saturating_sub(1) * pad <= avail
+    n.saturating_mul(cells)
+        .saturating_add(n.saturating_sub(1).saturating_mul(pad))
+        <= avail
 }
 
 /// Block size for a `cols` x `rows` pixel bitmap inside `avail` cells.
@@ -110,8 +112,11 @@ pub fn block_size(cfg: &Config, (cols, rows): (u16, u16), (aw, ah): (u16, u16)) 
     );
     let (aw, ah) = (aw as u32, ah as u32);
     let largest = |n: u32, pad: u32, avail: u32| {
-        (avail.saturating_sub(n.saturating_sub(1) * pad) / n.max(1)).max(1)
+        (avail.saturating_sub(n.saturating_sub(1).saturating_mul(pad)) / n.max(1)).max(1)
     };
+    if cols == 0 || rows == 0 {
+        return cfg.block;
+    }
     if cfg.on(Toggle::AutoRatio) {
         let (rx, ry) = (cfg.ratio.0 as u32, cfg.ratio.1 as u32);
         let mut k = 1;
@@ -328,7 +333,7 @@ mod tests {
     fn ascii_view_frame() {
         let c = cfg(&[
             "view ascii",
-            "set auto-size off",
+            "set auto-ratio off",
             "block 1 1",
             "padding 0 0",
             "margin 0 0",
@@ -377,13 +382,14 @@ mod tests {
 
     #[test]
     fn auto_size_and_auto_ratio() {
-        let c = cfg(&["padding 1 0"]);
+        let c = cfg(&["set auto-ratio off", "set auto-size on", "padding 1 0"]);
         assert_eq!(block_size(&c, (10, 5), (60, 20)), (5, 4));
         let c = cfg(&["set auto-ratio on", "ratio 2 1", "padding 0 0"]);
         assert_eq!(block_size(&c, (10, 5), (60, 20)), (6, 3));
-        let c = cfg(&["set auto-size off", "block 3 2"]);
+        let c = cfg(&["set auto-ratio off", "block 3 2"]);
         assert_eq!(block_size(&c, (10, 5), (60, 20)), (3, 2));
         let c = cfg(&["set auto-ratio on"]);
+        assert_eq!(block_size(&c, (0, 0), (60, 20)), (2, 1));
         assert_eq!(block_size(&c, (10, 5), (1, 1)), (2, 1));
     }
 

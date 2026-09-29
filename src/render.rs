@@ -19,6 +19,7 @@ pub struct Grid {
     pub h: u16,
     pub cells: Vec<Cell>,
     pub cursor: Option<(u16, u16)>,
+    clip_h: u16,
 }
 
 impl Grid {
@@ -34,11 +35,12 @@ impl Grid {
             h,
             cells: vec![blank; w as usize * h as usize],
             cursor: None,
+            clip_h: h,
         }
     }
 
     fn put(&mut self, x: i32, y: i32, ch: char, fg: Style, bg: Style) {
-        if x < 0 || y < 0 || x >= self.w as i32 || y >= self.h as i32 {
+        if x < 0 || y < 0 || x >= self.w as i32 || y >= self.clip_h as i32 {
             return;
         }
         let cell = &mut self.cells[y as usize * self.w as usize + x as usize];
@@ -152,8 +154,8 @@ pub fn render(s: &Scene, w: u16, h: u16) -> Grid {
 
     let area_h = panel_y.max(0) as u16;
     let (mx, my) = (cfg.margin.0, cfg.margin.1);
-    let aw = w.saturating_sub(mx * 2);
-    let ah = area_h.saturating_sub(my * 2);
+    let aw = w.saturating_sub(mx.saturating_mul(2));
+    let ah = area_h.saturating_sub(my.saturating_mul(2));
     let show_date = !s.date.is_empty() && (cfg.view == View::Date || cfg.on(Toggle::Date));
     let date_h = match (show_date, cfg.view) {
         (false, _) => 0,
@@ -181,6 +183,7 @@ pub fn render(s: &Scene, w: u16, h: u16) -> Grid {
 
     let y0 = my as i32 + ah.saturating_sub(clock_h.saturating_add(date_h)) as i32 / 2;
     let x0 = mx as i32 + aw.saturating_sub(clock_w) as i32 / 2;
+    g.clip_h = area_h;
     match cfg.view {
         View::Date => {}
         View::Icon => {
@@ -193,6 +196,7 @@ pub fn render(s: &Scene, w: u16, h: u16) -> Grid {
         let dw = s.date.chars().count() as i32;
         g.text_at((w as i32 - dw) / 2, dy, s.date, cfg.style(Target::Date));
     }
+    g.clip_h = h;
     g
 }
 
@@ -252,6 +256,9 @@ fn draw_bottom(g: &mut Grid, s: &Scene, y: i32) {
 }
 
 fn draw_panel(g: &mut Grid, cfg: &Config, panel: &Panel, top: i32, ph: u16) {
+    if ph == 0 {
+        return;
+    }
     let st = cfg.style(Target::Cava);
     match *panel {
         Panel::Off => {}
@@ -404,6 +411,18 @@ mod tests {
         assert_eq!(g.row(3), "█ █   ▄ ");
         s.panel = Panel::Message("cava not found");
         assert!(render(&s, 20, 5).text().contains("cava not found"));
+    }
+
+    #[test]
+    fn clock_never_draws_over_the_bottom_line() {
+        let c = cfg(&["view ascii"]);
+        let mut s = scene(&c, "12:34:56", "Tue");
+        s.bottom = Bottom::Prompt("view ascii", 10);
+        s.panel = Panel::Message("cava exited");
+        assert_eq!(render(&s, 30, 3).row(2).trim_end(), ":view ascii");
+        assert_eq!(render(&s, 30, 2).row(1).trim_end(), ":view ascii");
+        let c = cfg(&["margin 40000 0"]);
+        assert_eq!(render(&scene(&c, "1", ""), 10, 3).row(0).trim_end(), "");
     }
 
     #[test]

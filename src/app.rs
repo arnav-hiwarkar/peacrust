@@ -94,7 +94,9 @@ impl App {
     }
 
     pub fn stopwatch_value(&self, now: Instant) -> Duration {
-        self.cfg.stopwatch + self.stopwatch.elapsed(now)
+        self.cfg
+            .stopwatch
+            .saturating_add(self.stopwatch.elapsed(now))
     }
 
     pub fn animating(&self) -> bool {

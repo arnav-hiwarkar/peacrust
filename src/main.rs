@@ -54,6 +54,7 @@ fn run() -> i32 {
         eprintln!("peacrust: stdout is not a terminal");
         return 1;
     }
+    peacrust::clock::set_locale("");
     let mut app = App::new(dir.map(|d| d.join("history")));
     let now = Instant::now();
     if let Some(path) = config {

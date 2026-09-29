@@ -62,7 +62,8 @@ pub fn parse_duration(s: &str) -> Option<Duration> {
     }
     let mut total = 0u64;
     for part in s.split(':') {
-        let (num, unit) = part.split_at(part.len().checked_sub(1)?);
+        let unit_len = part.chars().last()?.len_utf8();
+        let (num, unit) = part.split_at(part.len() - unit_len);
         let n: u64 = num.parse().ok()?;
         total = total.checked_add(n.checked_mul(match unit {
             "h" => 3600,
@@ -279,7 +280,7 @@ mod tests {
         );
         assert_eq!(parse_duration("90s"), Some(Duration::from_secs(90)));
         assert_eq!(parse_duration("300"), Some(Duration::from_secs(300)));
-        for bad in ["", "5x", "m", "1h:", "-5s"] {
+        for bad in ["", "5x", "m", "1h:", "-5s", "5é", "ä"] {
             assert_eq!(parse_duration(bad), None, "{bad}");
         }
         assert_eq!(format_duration(Duration::from_secs(5405)), "01h:30m:05s");

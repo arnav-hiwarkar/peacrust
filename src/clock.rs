@@ -13,10 +13,10 @@ pub struct Counter {
 
 impl Counter {
     pub fn elapsed(&self, now: Instant) -> Duration {
-        self.base
-            + self
-                .started
-                .map_or(Duration::ZERO, |s| now.saturating_duration_since(s))
+        self.base.saturating_add(
+            self.started
+                .map_or(Duration::ZERO, |s| now.saturating_duration_since(s)),
+        )
     }
 
     pub fn running(&self) -> bool {

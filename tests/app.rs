@@ -146,6 +146,18 @@ fn stopwatch_runs_pauses_and_clears() {
 }
 
 #[test]
+fn huge_stopwatch_offset_saturates() {
+    let t = Instant::now();
+    let mut app = App::new(None);
+    command(&mut app, "stopwatch 18446744073709551615", t);
+    press(&mut app, "r ", t);
+    assert_eq!(
+        app.time_text(t + Duration::from_secs(5), &noon()),
+        "31:00:15"
+    );
+}
+
+#[test]
 fn space_does_nothing_in_clock_mode() {
     let t = Instant::now();
     let mut app = App::new(None);

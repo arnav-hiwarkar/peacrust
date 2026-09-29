@@ -75,7 +75,14 @@ impl Cava {
         let n = SPAWNS.fetch_add(1, Ordering::Relaxed);
         let conf =
             std::env::temp_dir().join(format!("peacrust-cava-{}-{n}.conf", std::process::id()));
-        std::fs::write(&conf, config_text(bars, &user_input_section())).map_err(|_| EXITED)?;
+        let mut file = std::fs::OpenOptions::new()
+            .write(true)
+            .create_new(true)
+            .open(&conf)
+            .map_err(|_| EXITED)?;
+        file.write_all(config_text(bars, &user_input_section()).as_bytes())
+            .map_err(|_| EXITED)?;
+        drop(file);
         let spawned = Command::new(bin)
             .arg("-p")
             .arg(&conf)
@@ -96,7 +103,12 @@ impl Cava {
         };
         let frame = Arc::new(Mutex::new(Vec::new()));
         let dead = Arc::new(AtomicBool::new(false));
-        let out = child.stdout.take().ok_or(EXITED)?;
+        let Some(out) = child.stdout.take() else {
+            let _ = child.kill();
+            let _ = child.wait();
+            let _ = std::fs::remove_file(&conf);
+            return Err(EXITED);
+        };
         let err = Arc::new(Mutex::new(String::new()));
         let err_reader = child.stderr.take().map(|stderr| {
             let e = err.clone();

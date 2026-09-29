@@ -13,7 +13,14 @@ use crossterm::terminal::{
 };
 use crossterm::{execute, queue};
 use std::io::{self, Write};
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::{Duration, Instant};
+
+static SIGNALLED: AtomicBool = AtomicBool::new(false);
+
+extern "C" fn on_signal(_: libc::c_int) {
+    SIGNALLED.store(true, Ordering::Relaxed);
+}
 
 /// Raw mode, alternate screen and hidden cursor for as long as it lives.
 pub struct TermGuard;
@@ -25,6 +32,12 @@ impl TermGuard {
             restore();
             prev(info);
         }));
+        // SAFETY: the handler only stores to an atomic, which is async-signal-safe.
+        unsafe {
+            for sig in [libc::SIGTERM, libc::SIGHUP, libc::SIGINT] {
+                libc::signal(sig, on_signal as *const () as libc::sighandler_t);
+            }
+        }
         terminal::enable_raw_mode()?;
         execute!(io::stdout(), EnterAlternateScreen, Hide)?;
         Ok(TermGuard)
@@ -132,7 +145,11 @@ pub fn run(app: &mut App) -> io::Result<()> {
             app.cfg.rate_input
         });
         let mut dirty = false;
-        if event::poll(timeout)? {
+        let ready = match event::poll(timeout) {
+            Err(e) if e.kind() == io::ErrorKind::Interrupted => false,
+            r => r?,
+        };
+        if ready {
             while {
                 match event::read()? {
                     Event::Key(k) => app.key(k, Instant::now()),
@@ -143,7 +160,7 @@ pub fn run(app: &mut App) -> io::Result<()> {
                 event::poll(Duration::ZERO)?
             } {}
         }
-        if app.quit {
+        if app.quit || SIGNALLED.load(Ordering::Relaxed) {
             return Ok(());
         }
         let now = Instant::now();

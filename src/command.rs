@@ -132,7 +132,11 @@ pub fn execute(line: &str, cfg: &mut Config) -> Result<Action, String> {
             Action::None
         }
         "locale" => {
-            c.locale = text(args)?;
+            let l = text(args)?;
+            if !crate::clock::set_locale(&l) {
+                return Err(format!("unsupported locale '{l}'"));
+            }
+            c.locale = l;
             Action::None
         }
         "timezone" => {

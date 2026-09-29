@@ -1,0 +1,11 @@
+pub mod app;
+pub mod cava;
+pub mod cli;
+pub mod clock;
+pub mod color;
+pub mod command;
+pub mod config;
+pub mod font;
+pub mod prompt;
+pub mod render;
+pub mod term;

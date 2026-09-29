@@ -1,0 +1,9 @@
+# peacrust default look · created by Hiwarkar
+view digital
+set auto-size on
+set date on
+set seconds on
+fill-inactive ''
+style active-fg blue
+style colon-fg blue
+style date bright-white

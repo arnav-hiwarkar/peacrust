@@ -1,0 +1,7 @@
+# One quiet line of time and date
+view icon
+set seconds off
+set banner off
+date '%a %d %b'
+style active-fg white
+style date bright-black

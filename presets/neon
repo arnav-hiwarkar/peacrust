@@ -1,0 +1,15 @@
+# Neon ascii clock with the cava visualizer
+view ascii
+set auto-size on
+fill-active '▓'
+fill-inactive ''
+fill-colon '●'
+style active-fg #ff2bd6
+style colon-fg #00e5ff
+style date #00e5ff
+style cava #ff2bd6
+style banner #00e5ff
+set cava on
+cava-bars 48
+cava-height 10
+fill-cava '█'

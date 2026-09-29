@@ -1,0 +1,12 @@
+# Seven-segment digits with dim unlit segments
+view digital
+set auto-size on
+padding 1 0
+fill-active '█'
+fill-inactive '█'
+fill-colon '█'
+style active-fg #ff5f1f
+style inactive-fg #2a1a12
+style colon-fg #ff5f1f
+style date #ffae80
+date '%A %d %B %Y'

@@ -34,7 +34,9 @@ pub fn tokenize(line: &str) -> Result<Vec<String>, String> {
             loop {
                 match chars.next() {
                     None => return Err("unterminated quote".into()),
-                    Some('\\') if chars.peek().is_some_and(|&n| n == c || n == '\\') => tok.push(chars.next().unwrap_or(c)),
+                    Some('\\') if chars.peek().is_some_and(|&n| n == c || n == '\\') => {
+                        tok.push(chars.next().unwrap_or(c))
+                    }
                     Some(ch) if ch == c => break,
                     Some(ch) => tok.push(ch),
                 }
@@ -121,7 +123,10 @@ pub fn execute(line: &str, cfg: &mut Config) -> Result<Action, String> {
     let action = match cmd.as_str() {
         "quit" | "exit" => Action::Quit,
         "help" => Action::Help(args.join(" ")),
-        "mkconfig" | "mkconfig!" => Action::MkConfig { path: text(args)?, force: cmd == "mkconfig!" },
+        "mkconfig" | "mkconfig!" => Action::MkConfig {
+            path: text(args)?,
+            force: cmd == "mkconfig!",
+        },
         "source" => Action::Source(text(args)?),
         "mode" => {
             c.mode = lookup(&MODES, arg0).ok_or(format!("unknown mode '{arg0}'"))?;
@@ -217,7 +222,11 @@ fn geometry_or_value(cmd: &str, args: &[String], c: &mut Config) -> Result<(), S
     match cmd {
         "fill" => {
             let s = text(args)?;
-            let s = if s.is_empty() { crate::config::DEFAULT_FILL.to_string() } else { s };
+            let s = if s.is_empty() {
+                crate::config::DEFAULT_FILL.to_string()
+            } else {
+                s
+            };
             c.fill_active = s.clone();
             c.fill_inactive = s.clone();
             c.fill_colon = s;
@@ -253,7 +262,10 @@ mod tests {
     #[test]
     fn tokenizes_quotes() {
         assert_eq!(tokenize("date '%a %b'").unwrap(), ["date", "%a %b"]);
-        assert_eq!(tokenize(r#"timer-exec "say \"hi\"""#).unwrap(), ["timer-exec", "say \"hi\""]);
+        assert_eq!(
+            tokenize(r#"timer-exec "say \"hi\"""#).unwrap(),
+            ["timer-exec", "say \"hi\""]
+        );
         assert_eq!(tokenize("fill ''").unwrap(), ["fill", ""]);
         assert!(tokenize("date 'oops").is_err());
     }
@@ -261,7 +273,10 @@ mod tests {
     #[test]
     fn durations() {
         assert_eq!(parse_duration("10m:0s"), Some(Duration::from_secs(600)));
-        assert_eq!(parse_duration("01h:30m:05s"), Some(Duration::from_secs(5405)));
+        assert_eq!(
+            parse_duration("01h:30m:05s"),
+            Some(Duration::from_secs(5405))
+        );
         assert_eq!(parse_duration("90s"), Some(Duration::from_secs(90)));
         assert_eq!(parse_duration("300"), Some(Duration::from_secs(300)));
         for bad in ["", "5x", "m", "1h:", "-5s"] {
@@ -272,7 +287,12 @@ mod tests {
 
     #[test]
     fn mode_view_and_toggles() {
-        let c = run(&["mode timer", "view binary", "set seconds off", "set cava on"]);
+        let c = run(&[
+            "mode timer",
+            "view binary",
+            "set seconds off",
+            "set cava on",
+        ]);
         assert_eq!(c.mode, Mode::Timer);
         assert_eq!(c.view, View::Binary);
         assert!(!c.on(Toggle::Seconds));
@@ -281,22 +301,51 @@ mod tests {
 
     #[test]
     fn geometry() {
-        let c = run(&["block 4 2", "block-y 3", "padding-x 5", "margin 0 2", "ratio 0 0", "date-padding 4"]);
-        assert_eq!((c.block, c.padding.0, c.margin, c.ratio, c.date_padding), ((4, 3), 5, (0, 2), (1, 1), 4));
+        let c = run(&[
+            "block 4 2",
+            "block-y 3",
+            "padding-x 5",
+            "margin 0 2",
+            "ratio 0 0",
+            "date-padding 4",
+        ]);
+        assert_eq!(
+            (c.block, c.padding.0, c.margin, c.ratio, c.date_padding),
+            ((4, 3), 5, (0, 2), (1, 1), 4)
+        );
     }
 
     #[test]
     fn fills_and_rates() {
-        let c = run(&["fill '#'", "fill-colon ':'", "rate-refresh 0", "cava-bars 9999"]);
-        assert_eq!((c.fill_active.as_str(), c.fill_inactive.as_str(), c.fill_colon.as_str()), ("#", "#", ":"));
+        let c = run(&[
+            "fill '#'",
+            "fill-colon ':'",
+            "rate-refresh 0",
+            "cava-bars 9999",
+        ]);
+        assert_eq!(
+            (
+                c.fill_active.as_str(),
+                c.fill_inactive.as_str(),
+                c.fill_colon.as_str()
+            ),
+            ("#", "#", ":")
+        );
         assert_eq!((c.rate_refresh, c.cava_bars), (1, 512));
         assert_eq!(run(&["fill ''"]).fill_active, "█");
     }
 
     #[test]
     fn styles() {
-        let c = run(&["style active-fg #7c3aed", "style date reverse", "style error clear"]);
-        assert_eq!(c.style(Target::ActiveFg).color, Some(Color::Rgb(0x7c, 0x3a, 0xed)));
+        let c = run(&[
+            "style active-fg #7c3aed",
+            "style date reverse",
+            "style error clear",
+        ]);
+        assert_eq!(
+            c.style(Target::ActiveFg).color,
+            Some(Color::Rgb(0x7c, 0x3a, 0xed))
+        );
         assert!(c.style(Target::Date).reverse);
         assert_eq!(c.style(Target::Error), Style::default());
     }
@@ -304,12 +353,27 @@ mod tests {
     #[test]
     fn counters_and_actions() {
         let mut c = Config::default();
-        assert_eq!(execute("timer 5m", &mut c), Ok(Action::Timer(CounterOp::Clear)));
+        assert_eq!(
+            execute("timer 5m", &mut c),
+            Ok(Action::Timer(CounterOp::Clear))
+        );
         assert_eq!(c.timer, Duration::from_secs(300));
-        assert_eq!(execute("stopwatch start", &mut c), Ok(Action::Stopwatch(CounterOp::Start)));
+        assert_eq!(
+            execute("stopwatch start", &mut c),
+            Ok(Action::Stopwatch(CounterOp::Start))
+        );
         assert_eq!(execute("exit", &mut c), Ok(Action::Quit));
-        assert_eq!(execute("help timer", &mut c), Ok(Action::Help("timer".into())));
-        assert_eq!(execute("mkconfig! /tmp/x", &mut c), Ok(Action::MkConfig { path: "/tmp/x".into(), force: true }));
+        assert_eq!(
+            execute("help timer", &mut c),
+            Ok(Action::Help("timer".into()))
+        );
+        assert_eq!(
+            execute("mkconfig! /tmp/x", &mut c),
+            Ok(Action::MkConfig {
+                path: "/tmp/x".into(),
+                force: true
+            })
+        );
         assert_eq!(execute("# comment", &mut c), Ok(Action::None));
         assert_eq!(execute("   ", &mut c), Ok(Action::None));
     }
@@ -338,7 +402,10 @@ mod tests {
 
     #[test]
     fn timezone_accepts_real_zone() {
-        assert_eq!(run(&["timezone 'America/Vancouver'"]).timezone, "America/Vancouver");
+        assert_eq!(
+            run(&["timezone 'America/Vancouver'"]).timezone,
+            "America/Vancouver"
+        );
     }
 
     #[test]

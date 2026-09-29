@@ -1,7 +1,7 @@
 use std::io::{BufRead, BufReader, Write};
 use std::path::{Path, PathBuf};
 use std::process::{Child, Command, Stdio};
-use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex};
 
 pub const NOT_FOUND: &str = "cava not found · run peacrust --install-cava";
@@ -17,7 +17,12 @@ pub fn config_text(bars: u16) -> String {
 
 /// One raw ascii frame, e.g. `12;400;1000;`. Malformed frames are dropped.
 pub fn parse_frame(line: &str) -> Option<Vec<u16>> {
-    let bars: Option<Vec<u16>> = line.trim().split(';').filter(|s| !s.is_empty()).map(|s| s.parse().ok()).collect();
+    let bars: Option<Vec<u16>> = line
+        .trim()
+        .split(';')
+        .filter(|s| !s.is_empty())
+        .map(|s| s.parse().ok())
+        .collect();
     bars.filter(|b| !b.is_empty())
 }
 
@@ -30,10 +35,13 @@ pub struct Cava {
 }
 
 impl Cava {
-    pub fn spawn(bars: u16) -> Result<Cava, &'static str> {
-        let conf = std::env::temp_dir().join(format!("peacrust-cava-{}.conf", std::process::id()));
+    pub fn spawn(bin: &str, bars: u16) -> Result<Cava, &'static str> {
+        static SPAWNS: AtomicUsize = AtomicUsize::new(0);
+        let n = SPAWNS.fetch_add(1, Ordering::Relaxed);
+        let conf =
+            std::env::temp_dir().join(format!("peacrust-cava-{}-{n}.conf", std::process::id()));
         std::fs::write(&conf, config_text(bars)).map_err(|_| EXITED)?;
-        let spawned = Command::new("cava")
+        let spawned = Command::new(bin)
             .arg("-p")
             .arg(&conf)
             .stdin(Stdio::null())
@@ -44,7 +52,11 @@ impl Cava {
             Ok(c) => c,
             Err(e) => {
                 let _ = std::fs::remove_file(&conf);
-                return Err(if e.kind() == std::io::ErrorKind::NotFound { NOT_FOUND } else { EXITED });
+                return Err(if e.kind() == std::io::ErrorKind::NotFound {
+                    NOT_FOUND
+                } else {
+                    EXITED
+                });
             }
         };
         let frame = Arc::new(Mutex::new(Vec::new()));
@@ -60,11 +72,21 @@ impl Cava {
             }
             d.store(true, Ordering::Relaxed);
         });
-        Ok(Cava { child, conf, frame, dead, bars })
+        Ok(Cava {
+            child,
+            conf,
+            frame,
+            dead,
+            bars,
+        })
     }
 
     pub fn frame(&self) -> Vec<u16> {
         self.frame.lock().unwrap_or_else(|e| e.into_inner()).clone()
+    }
+
+    pub fn conf(&self) -> &Path {
+        &self.conf
     }
 
     pub fn alive(&self) -> bool {
@@ -81,7 +103,11 @@ impl Drop for Cava {
 }
 
 pub fn which(bin: &str) -> Option<PathBuf> {
-    std::env::var_os("PATH")?.to_str()?.split(':').map(|d| Path::new(d).join(bin)).find(|p| p.is_file())
+    std::env::var_os("PATH")?
+        .to_str()?
+        .split(':')
+        .map(|d| Path::new(d).join(bin))
+        .find(|p| p.is_file())
 }
 
 /// The package-manager command that installs cava here, if any is known.
@@ -90,12 +116,20 @@ pub fn install_command(has: impl Fn(&str) -> bool, root: bool) -> Option<Vec<&'s
         ("brew", &["brew", "install", "cava"], false),
         ("apt-get", &["apt-get", "install", "-y", "cava"], true),
         ("dnf", &["dnf", "install", "-y", "cava"], true),
-        ("pacman", &["pacman", "-S", "--needed", "--noconfirm", "cava"], true),
+        (
+            "pacman",
+            &["pacman", "-S", "--needed", "--noconfirm", "cava"],
+            true,
+        ),
         ("zypper", &["zypper", "install", "-y", "cava"], true),
         ("apk", &["apk", "add", "cava"], true),
     ];
     let (_, cmd, needs_root) = table.into_iter().find(|(bin, _, _)| has(bin))?;
-    let mut out = if needs_root && !root { vec!["sudo"] } else { vec![] };
+    let mut out = if needs_root && !root {
+        vec!["sudo"]
+    } else {
+        vec![]
+    };
     out.extend(cmd);
     Some(out)
 }
@@ -109,7 +143,9 @@ pub fn install_interactive() -> i32 {
     // SAFETY: geteuid has no preconditions.
     let root = unsafe { libc::geteuid() } == 0;
     let Some(cmd) = install_command(|b| which(b).is_some(), root) else {
-        eprintln!("No supported package manager found. Install cava from https://github.com/karlstav/cava");
+        eprintln!(
+            "No supported package manager found. Install cava from https://github.com/karlstav/cava"
+        );
         return 1;
     };
     print!("Install cava with `{}`? [y/N] ", cmd.join(" "));
@@ -146,14 +182,27 @@ mod tests {
     #[test]
     fn config_requests_raw_ascii_bars() {
         let t = config_text(48);
-        assert!(t.contains("bars = 48\n") && t.contains("method = raw\n") && t.contains("data_format = ascii\n"));
+        assert!(
+            t.contains("bars = 48\n")
+                && t.contains("method = raw\n")
+                && t.contains("data_format = ascii\n")
+        );
     }
 
     #[test]
     fn picks_package_manager() {
-        assert_eq!(install_command(|b| b == "brew" || b == "apt-get", false), Some(vec!["brew", "install", "cava"]));
-        assert_eq!(install_command(|b| b == "apt-get", false), Some(vec!["sudo", "apt-get", "install", "-y", "cava"]));
-        assert_eq!(install_command(|b| b == "pacman", true), Some(vec!["pacman", "-S", "--needed", "--noconfirm", "cava"]));
+        assert_eq!(
+            install_command(|b| b == "brew" || b == "apt-get", false),
+            Some(vec!["brew", "install", "cava"])
+        );
+        assert_eq!(
+            install_command(|b| b == "apt-get", false),
+            Some(vec!["sudo", "apt-get", "install", "-y", "cava"])
+        );
+        assert_eq!(
+            install_command(|b| b == "pacman", true),
+            Some(vec!["pacman", "-S", "--needed", "--noconfirm", "cava"])
+        );
         assert_eq!(install_command(|_| false, false), None);
     }
 

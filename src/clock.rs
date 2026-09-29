@@ -13,7 +13,10 @@ pub struct Counter {
 
 impl Counter {
     pub fn elapsed(&self, now: Instant) -> Duration {
-        self.base + self.started.map_or(Duration::ZERO, |s| now.saturating_duration_since(s))
+        self.base
+            + self
+                .started
+                .map_or(Duration::ZERO, |s| now.saturating_duration_since(s))
     }
 
     pub fn running(&self) -> bool {
@@ -30,7 +33,11 @@ impl Counter {
     }
 
     pub fn toggle(&mut self, now: Instant) {
-        if self.running() { self.stop(now) } else { self.start(now) }
+        if self.running() {
+            self.stop(now)
+        } else {
+            self.start(now)
+        }
     }
 
     pub fn clear(&mut self) {
@@ -68,7 +75,9 @@ pub fn set_locale(name: &str) -> bool {
     if cur.as_deref() == Some(name) {
         return true;
     }
-    let Ok(c) = CString::new(name) else { return false };
+    let Ok(c) = CString::new(name) else {
+        return false;
+    };
     // SAFETY: setlocale is only called from here, under the LOCALE lock.
     let ok = unsafe { !libc::setlocale(libc::LC_TIME, c.as_ptr()).is_null() };
     if ok {
@@ -82,7 +91,11 @@ pub fn format_date(fmt: &str, z: &Zoned) -> String {
     if fmt.is_empty() {
         return String::new();
     }
-    let abbrev = z.time_zone().to_offset_info(z.timestamp()).abbreviation().to_string();
+    let abbrev = z
+        .time_zone()
+        .to_offset_info(z.timestamp())
+        .abbreviation()
+        .to_string();
     let (Ok(cfmt), Ok(zone)) = (CString::new(fmt), CString::new(abbrev)) else {
         return String::new();
     };
@@ -118,15 +131,30 @@ mod tests {
         let t0 = Instant::now();
         let mut c = Counter::default();
         c.start(t0);
-        assert_eq!(c.elapsed(t0 + Duration::from_secs(5)), Duration::from_secs(5));
+        assert_eq!(
+            c.elapsed(t0 + Duration::from_secs(5)),
+            Duration::from_secs(5)
+        );
         c.stop(t0 + Duration::from_secs(5));
-        assert_eq!(c.elapsed(t0 + Duration::from_secs(100)), Duration::from_secs(5));
+        assert_eq!(
+            c.elapsed(t0 + Duration::from_secs(100)),
+            Duration::from_secs(5)
+        );
         c.toggle(t0 + Duration::from_secs(100));
-        assert_eq!(c.elapsed(t0 + Duration::from_secs(102)), Duration::from_secs(7));
+        assert_eq!(
+            c.elapsed(t0 + Duration::from_secs(102)),
+            Duration::from_secs(7)
+        );
         c.start(t0 + Duration::from_secs(200));
-        assert_eq!(c.elapsed(t0 + Duration::from_secs(102)), Duration::from_secs(7));
+        assert_eq!(
+            c.elapsed(t0 + Duration::from_secs(102)),
+            Duration::from_secs(7)
+        );
         c.clear();
-        assert_eq!((c.elapsed(t0 + Duration::from_secs(300)), c.running()), (Duration::ZERO, false));
+        assert_eq!(
+            (c.elapsed(t0 + Duration::from_secs(300)), c.running()),
+            (Duration::ZERO, false)
+        );
     }
 
     #[test]
@@ -151,7 +179,10 @@ mod tests {
     fn formats_dates_in_c_locale() {
         assert!(set_locale("C"));
         let z = at("2026-09-29T14:03:00-07:00[America/Vancouver]");
-        assert_eq!(format_date("%a %b %d %Y %H:%M %p %Z %j", &z), "Tue Sep 29 2026 14:03 PM PDT 272");
+        assert_eq!(
+            format_date("%a %b %d %Y %H:%M %p %Z %j", &z),
+            "Tue Sep 29 2026 14:03 PM PDT 272"
+        );
         assert_eq!(format_date("", &z), "");
         assert!(!set_locale("xx_NOPE.UTF-8"));
     }

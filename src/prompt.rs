@@ -27,10 +27,20 @@ pub struct Prompt {
 /// Case-insensitive subsequence match: `vb` matches `view binary`.
 pub fn fuzzy(query: &str, entry: &str) -> bool {
     let mut e = entry.chars().flat_map(char::to_lowercase);
-    query.chars().flat_map(char::to_lowercase).all(|q| e.any(|c| c == q))
+    query
+        .chars()
+        .flat_map(char::to_lowercase)
+        .all(|q| e.any(|c| c == q))
 }
 
 impl Prompt {
+    pub fn with_history(history: Vec<String>) -> Prompt {
+        Prompt {
+            history,
+            ..Default::default()
+        }
+    }
+
     pub fn text(&self) -> String {
         self.input.iter().collect()
     }
@@ -68,7 +78,10 @@ impl Prompt {
             Edit::Delete | Edit::Backspace => {}
             Edit::Clear => self.set(""),
             Edit::Prev => {
-                let (from, query) = self.browse.take().unwrap_or((self.history.len(), self.text()));
+                let (from, query) = self
+                    .browse
+                    .take()
+                    .unwrap_or((self.history.len(), self.text()));
                 let hit = self.history[..from].iter().rposition(|h| fuzzy(&query, h));
                 match hit {
                     Some(i) => {
@@ -80,7 +93,9 @@ impl Prompt {
                 }
             }
             Edit::Next => {
-                let Some((from, query)) = self.browse.take() else { return };
+                let Some((from, query)) = self.browse.take() else {
+                    return;
+                };
                 let start = (from + 1).min(self.history.len());
                 match self.history[start..].iter().position(|h| fuzzy(&query, h)) {
                     Some(i) => {
@@ -115,7 +130,11 @@ impl Prompt {
 
 pub fn load_history(path: &Path) -> Vec<String> {
     let text = std::fs::read_to_string(path).unwrap_or_default();
-    let mut lines: Vec<String> = text.lines().filter(|l| !l.trim().is_empty()).map(String::from).collect();
+    let mut lines: Vec<String> = text
+        .lines()
+        .filter(|l| !l.trim().is_empty())
+        .map(String::from)
+        .collect();
     let over = lines.len().saturating_sub(HISTORY_CAP);
     lines.drain(..over);
     lines
@@ -172,7 +191,14 @@ mod tests {
 
     #[test]
     fn history_navigation_matches_fuzzily() {
-        let mut p = Prompt { history: vec!["view binary".into(), "mode timer".into(), "view ascii".into()], ..Default::default() };
+        let mut p = Prompt {
+            history: vec![
+                "view binary".into(),
+                "mode timer".into(),
+                "view ascii".into(),
+            ],
+            ..Default::default()
+        };
         "vb".chars().for_each(|c| p.edit(Edit::Insert(c)));
         p.edit(Edit::Prev);
         assert_eq!(p.text(), "view binary");
@@ -200,10 +226,14 @@ mod tests {
 
     #[test]
     fn history_persists() {
-        let path = std::env::temp_dir().join(format!("peacrust-hist-{}/history", std::process::id()));
+        let path =
+            std::env::temp_dir().join(format!("peacrust-hist-{}/history", std::process::id()));
         save_history(&path, &["a".into(), "b".into()]).unwrap();
         assert_eq!(load_history(&path), ["a", "b"]);
-        assert_eq!(load_history(Path::new("/nonexistent/peacrust")), Vec::<String>::new());
+        assert_eq!(
+            load_history(Path::new("/nonexistent/peacrust")),
+            Vec::<String>::new()
+        );
         std::fs::remove_dir_all(path.parent().unwrap()).unwrap();
     }
 }

@@ -17,7 +17,11 @@ pub enum View {
     Icon,
 }
 
-pub const MODES: [(Mode, &str); 3] = [(Mode::Clock, "clock"), (Mode::Timer, "timer"), (Mode::Stopwatch, "stopwatch")];
+pub const MODES: [(Mode, &str); 3] = [
+    (Mode::Clock, "clock"),
+    (Mode::Timer, "timer"),
+    (Mode::Stopwatch, "stopwatch"),
+];
 pub const VIEWS: [(View, &str); 5] = [
     (View::Digital, "digital"),
     (View::Ascii, "ascii"),
@@ -68,7 +72,11 @@ pub const TARGETS: [(Target, &str); 14] = [
 ];
 
 pub fn name_of<T: PartialEq + Copy>(table: &[(T, &'static str)], v: T) -> &'static str {
-    table.iter().find(|(t, _)| *t == v).map(|(_, n)| *n).unwrap_or("")
+    table
+        .iter()
+        .find(|(t, _)| *t == v)
+        .map(|(_, n)| *n)
+        .unwrap_or("")
 }
 
 pub fn lookup<T: Copy>(table: &[(T, &str)], name: &str) -> Option<T> {
@@ -129,7 +137,8 @@ pub struct Config {
 impl Default for Config {
     fn default() -> Self {
         let mut styles = [Style::default(); 14];
-        let set = |styles: &mut [Style; 14], t: Target, c: Color| styles[t as usize].color = Some(c);
+        let set =
+            |styles: &mut [Style; 14], t: Target, c: Color| styles[t as usize].color = Some(c);
         set(&mut styles, Target::ActiveFg, Color::Ansi(4));
         set(&mut styles, Target::InactiveFg, Color::Ansi(8));
         set(&mut styles, Target::ColonFg, Color::Ansi(4));
@@ -156,7 +165,7 @@ impl Default for Config {
             fill_colon: DEFAULT_FILL.into(),
             fill_cava: DEFAULT_FILL.into(),
             rate_input: 50,
-            rate_refresh: 250,
+            rate_refresh: 100,
             rate_status: 2000,
             styles,
             timer: Duration::from_secs(10 * 60),
@@ -194,7 +203,10 @@ impl Config {
             format!("date-padding {}", self.date_padding),
         ];
         for (t, name) in TOGGLES {
-            out.push(format!("set {name} {}", if self.on(t) { "on" } else { "off" }));
+            out.push(format!(
+                "set {name} {}",
+                if self.on(t) { "on" } else { "off" }
+            ));
         }
         out.push(format!("fill-active {}", q(&self.fill_active)));
         out.push(format!("fill-inactive {}", q(&self.fill_inactive)));
@@ -213,9 +225,15 @@ impl Config {
                 out.push(format!("style {name} reverse"));
             }
         }
-        out.push(format!("timer {}", crate::command::format_duration(self.timer)));
+        out.push(format!(
+            "timer {}",
+            crate::command::format_duration(self.timer)
+        ));
         out.push(format!("timer-exec {}", q(&self.timer_exec)));
-        out.push(format!("stopwatch {}", crate::command::format_duration(self.stopwatch)));
+        out.push(format!(
+            "stopwatch {}",
+            crate::command::format_duration(self.stopwatch)
+        ));
         out.push(format!("cava-bars {}", self.cava_bars));
         out.push(format!("cava-height {}", self.cava_height));
         out.join("\n") + "\n"

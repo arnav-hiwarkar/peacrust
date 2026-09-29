@@ -1,0 +1,10 @@
+# Binary clock: columns are HH MM SS, rows are 8 4 2 1
+view binary
+set auto-ratio on
+ratio 2 1
+padding 1 1
+fill-active '█'
+fill-inactive '░'
+style active-fg #7ee787
+style inactive-fg #1f3b24
+date '%H:%M:%S'

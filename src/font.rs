@@ -36,9 +36,20 @@ const SEGMENT_PIXELS: [[(usize, usize); 3]; 7] = [
 fn glyph(view: View, ch: char) -> Vec<Vec<Px>> {
     let d = ch.to_digit(10).map(|d| d as usize);
     match (view, d) {
-        (View::Binary, Some(d)) => [8, 4, 2, 1].iter().map(|b| vec![if d & b != 0 { Px::On } else { Px::Off }]).collect(),
+        (View::Binary, Some(d)) => [8, 4, 2, 1]
+            .iter()
+            .map(|b| vec![if d & b != 0 { Px::On } else { Px::Off }])
+            .collect(),
         (View::Binary, None) => vec![vec![Px::Blank]; 4],
-        (_, None) => (0..5).map(|r| vec![if r == 1 || r == 3 { Px::Colon } else { Px::Blank }]).collect(),
+        (_, None) => (0..5)
+            .map(|r| {
+                vec![if r == 1 || r == 3 {
+                    Px::Colon
+                } else {
+                    Px::Blank
+                }]
+            })
+            .collect(),
         (View::Digital, Some(d)) => {
             let mut g = vec![vec![Px::Blank; 3]; 5];
             for (seg, pixels) in SEGMENT_PIXELS.iter().enumerate() {
@@ -55,7 +66,11 @@ fn glyph(view: View, ch: char) -> Vec<Vec<Px>> {
         }
         (_, Some(d)) => ASCII[d]
             .iter()
-            .map(|row| (0..3).map(|x| if row & (4 >> x) != 0 { Px::On } else { Px::Off }).collect())
+            .map(|row| {
+                (0..3)
+                    .map(|x| if row & (4 >> x) != 0 { Px::On } else { Px::Off })
+                    .collect()
+            })
             .collect(),
     }
 }
@@ -94,17 +109,35 @@ mod tests {
 
     #[test]
     fn ascii_digits() {
-        assert_eq!(show(&bitmap(View::Ascii, "4:2")), ["#.#   ###", "#.# : ..#", "###   ###", "..# : #..", "..#   ###"]);
+        assert_eq!(
+            show(&bitmap(View::Ascii, "4:2")),
+            [
+                "#.#   ###",
+                "#.# : ..#",
+                "###   ###",
+                "..# : #..",
+                "..#   ###"
+            ]
+        );
     }
 
     #[test]
     fn digital_shows_unlit_segments() {
-        assert_eq!(show(&bitmap(View::Digital, "1")), ["..#", ". #", "..#", ". #", "..#"]);
-        assert_eq!(show(&bitmap(View::Digital, "8")), ["###", "# #", "###", "# #", "###"]);
+        assert_eq!(
+            show(&bitmap(View::Digital, "1")),
+            ["..#", ". #", "..#", ". #", "..#"]
+        );
+        assert_eq!(
+            show(&bitmap(View::Digital, "8")),
+            ["###", "# #", "###", "# #", "###"]
+        );
     }
 
     #[test]
     fn binary_bits() {
-        assert_eq!(show(&bitmap(View::Binary, "09:5")), [". #   .", ". .   #", ". .   .", ". #   #"]);
+        assert_eq!(
+            show(&bitmap(View::Binary, "09:5")),
+            [". #   .", ". .   #", ". .   .", ". #   #"]
+        );
     }
 }

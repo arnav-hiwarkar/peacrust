@@ -5,7 +5,9 @@ pub enum Color {
     Rgb(u8, u8, u8),
 }
 
-const NAMES: [&str; 8] = ["black", "red", "green", "yellow", "blue", "magenta", "cyan", "white"];
+const NAMES: [&str; 8] = [
+    "black", "red", "green", "yellow", "blue", "magenta", "cyan", "white",
+];
 
 const ANSI_RGB: [(u8, u8, u8); 16] = [
     (0, 0, 0),
@@ -39,7 +41,10 @@ impl Color {
             Some(rest) => (8, rest),
             None => (0, s.as_str()),
         };
-        NAMES.iter().position(|n| *n == name).map(|i| Color::Ansi(i as u8 + bright))
+        NAMES
+            .iter()
+            .position(|n| *n == name)
+            .map(|i| Color::Ansi(i as u8 + bright))
     }
 
     pub fn to_rgb(self) -> (u8, u8, u8) {
@@ -77,7 +82,11 @@ fn parse_hex(hex: &str) -> Option<Color> {
     }
     let digit = |i: usize, len: usize| u8::from_str_radix(&hex[i..i + len], 16).ok();
     match hex.len() {
-        3 => Some(Color::Rgb(digit(0, 1)? * 17, digit(1, 1)? * 17, digit(2, 1)? * 17)),
+        3 => Some(Color::Rgb(
+            digit(0, 1)? * 17,
+            digit(1, 1)? * 17,
+            digit(2, 1)? * 17,
+        )),
         6 => Some(Color::Rgb(digit(0, 2)?, digit(2, 2)?, digit(4, 2)?)),
         _ => None,
     }
@@ -124,7 +133,11 @@ pub fn from_hsl(h: f64, s: f64, l: f64) -> (u8, u8, u8) {
 /// Shift a color in HSL space. A missing color starts from white.
 pub fn adjust(color: Option<Color>, dh: f64, ds: f64, dl: f64) -> Color {
     let (h, s, l) = to_hsl(color.map_or((255, 255, 255), Color::to_rgb));
-    let (r, g, b) = from_hsl((h + dh).rem_euclid(360.0), (s + ds).clamp(0.0, 100.0), (l + dl).clamp(0.0, 100.0));
+    let (r, g, b) = from_hsl(
+        (h + dh).rem_euclid(360.0),
+        (s + ds).clamp(0.0, 100.0),
+        (l + dl).clamp(0.0, 100.0),
+    );
     Color::Rgb(r, g, b)
 }
 
@@ -154,7 +167,10 @@ mod tests {
         assert_eq!(Color::Ansi(9).to_string(), "bright-red");
         assert_eq!(Color::Idx(42).to_string(), "42");
         assert_eq!(Color::Rgb(1, 2, 255).to_string(), "#0102ff");
-        assert_eq!(Color::parse("bright-cyan").unwrap().to_string(), "bright-cyan");
+        assert_eq!(
+            Color::parse("bright-cyan").unwrap().to_string(),
+            "bright-cyan"
+        );
     }
 
     #[test]
@@ -175,10 +191,22 @@ mod tests {
 
     #[test]
     fn adjust_wraps_hue_and_clamps() {
-        assert_eq!(adjust(Some(Color::Rgb(255, 0, 0)), 120.0, 0.0, 0.0), Color::Rgb(0, 255, 0));
-        assert_eq!(adjust(Some(Color::Rgb(255, 0, 0)), -120.0, 0.0, 0.0), Color::Rgb(0, 0, 255));
-        assert_eq!(adjust(Some(Color::Rgb(255, 0, 0)), 0.0, 0.0, 90.0), Color::Rgb(255, 255, 255));
+        assert_eq!(
+            adjust(Some(Color::Rgb(255, 0, 0)), 120.0, 0.0, 0.0),
+            Color::Rgb(0, 255, 0)
+        );
+        assert_eq!(
+            adjust(Some(Color::Rgb(255, 0, 0)), -120.0, 0.0, 0.0),
+            Color::Rgb(0, 0, 255)
+        );
+        assert_eq!(
+            adjust(Some(Color::Rgb(255, 0, 0)), 0.0, 0.0, 90.0),
+            Color::Rgb(255, 255, 255)
+        );
         assert_eq!(adjust(None, 0.0, 0.0, -5.0), Color::Rgb(242, 242, 242));
-        assert_eq!(adjust(Some(Color::Ansi(1)), 0.0, -100.0, 0.0), Color::Rgb(103, 103, 103));
+        assert_eq!(
+            adjust(Some(Color::Ansi(1)), 0.0, -100.0, 0.0),
+            Color::Rgb(103, 103, 103)
+        );
     }
 }

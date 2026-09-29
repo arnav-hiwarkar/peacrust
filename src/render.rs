@@ -23,8 +23,18 @@ pub struct Grid {
 
 impl Grid {
     fn new(w: u16, h: u16, bg: Option<Color>) -> Grid {
-        let blank = Cell { ch: ' ', fg: None, bg, reverse: false };
-        Grid { w, h, cells: vec![blank; w as usize * h as usize], cursor: None }
+        let blank = Cell {
+            ch: ' ',
+            fg: None,
+            bg,
+            reverse: false,
+        };
+        Grid {
+            w,
+            h,
+            cells: vec![blank; w as usize * h as usize],
+            cursor: None,
+        }
     }
 
     fn put(&mut self, x: i32, y: i32, ch: char, fg: Style, bg: Style) {
@@ -51,12 +61,18 @@ impl Grid {
 
     pub fn row(&self, y: u16) -> String {
         let start = y as usize * self.w as usize;
-        self.cells[start..start + self.w as usize].iter().map(|c| c.ch).collect()
+        self.cells[start..start + self.w as usize]
+            .iter()
+            .map(|c| c.ch)
+            .collect()
     }
 
     /// The frame as plain text, trailing spaces trimmed. Used by tests.
     pub fn text(&self) -> String {
-        (0..self.h).map(|y| self.row(y).trim_end().to_string()).collect::<Vec<_>>().join("\n")
+        (0..self.h)
+            .map(|y| self.row(y).trim_end().to_string())
+            .collect::<Vec<_>>()
+            .join("\n")
     }
 }
 
@@ -86,16 +102,26 @@ fn fits(n: u32, cells: u32, pad: u32, avail: u32) -> bool {
 
 /// Block size for a `cols` x `rows` pixel bitmap inside `avail` cells.
 pub fn block_size(cfg: &Config, (cols, rows): (u16, u16), (aw, ah): (u16, u16)) -> (u16, u16) {
-    let (c, r, px, py) = (cols as u32, rows as u32, cfg.padding.0 as u32, cfg.padding.1 as u32);
+    let (c, r, px, py) = (
+        cols as u32,
+        rows as u32,
+        cfg.padding.0 as u32,
+        cfg.padding.1 as u32,
+    );
     let (aw, ah) = (aw as u32, ah as u32);
-    let largest = |n: u32, pad: u32, avail: u32| (avail.saturating_sub(n.saturating_sub(1) * pad) / n.max(1)).max(1);
+    let largest = |n: u32, pad: u32, avail: u32| {
+        (avail.saturating_sub(n.saturating_sub(1) * pad) / n.max(1)).max(1)
+    };
     if cfg.on(Toggle::AutoRatio) {
         let (rx, ry) = (cfg.ratio.0 as u32, cfg.ratio.1 as u32);
         let mut k = 1;
         while fits(c, (k + 1) * rx, px, aw) && fits(r, (k + 1) * ry, py, ah) {
             k += 1;
         }
-        return ((k * rx).min(u16::MAX as u32) as u16, (k * ry).min(u16::MAX as u32) as u16);
+        return (
+            (k * rx).min(u16::MAX as u32) as u16,
+            (k * ry).min(u16::MAX as u32) as u16,
+        );
     }
     if cfg.on(Toggle::AutoSize) {
         return (largest(c, px, aw) as u16, largest(r, py, ah) as u16);
@@ -124,40 +150,43 @@ pub fn render(s: &Scene, w: u16, h: u16) -> Grid {
     let aw = w.saturating_sub(mx * 2);
     let ah = area_h.saturating_sub(my * 2);
     let show_date = !s.date.is_empty() && (cfg.view == View::Date || cfg.on(Toggle::Date));
-    let date_h = if show_date && cfg.view != View::Date { cfg.date_padding.saturating_add(1) } else { 0 };
-
-    let (clock_w, clock_h, draw): (u16, u16, Box<dyn Fn(&mut Grid, i32, i32)>) = match cfg.view {
-        View::Date => (0, 0, Box::new(|_: &mut Grid, _, _| {})),
-        View::Icon => {
-            let t = s.time.to_string();
-            let st = cfg.style(Target::ActiveFg);
-            (t.chars().count() as u16, 1, Box::new(move |g: &mut Grid, x, y| {
-                g.text_at(x, y, &t, st);
-            }))
-        }
-        view => {
-            let bm = bitmap(view, s.time);
-            let (cols, rows) = (bm.first().map_or(0, Vec::len) as u16, bm.len() as u16);
-            let (bx, by) = block_size(cfg, (cols, rows), (aw, ah.saturating_sub(date_h)));
-            let (bx, by) = (bx.min(w), by.min(h));
-            let (px, py) = cfg.padding;
-            let cw = cols.saturating_mul(bx).saturating_add(cols.saturating_sub(1).saturating_mul(px));
-            let ch = rows.saturating_mul(by).saturating_add(rows.saturating_sub(1).saturating_mul(py));
-            let cfg = cfg.clone();
-            (cw, ch, Box::new(move |g: &mut Grid, x0, y0| draw_bitmap(g, &cfg, &bm, (bx, by), x0, y0)))
-        }
+    let date_h = match (show_date, cfg.view) {
+        (false, _) => 0,
+        (true, View::Date) => 1,
+        (true, _) => cfg.date_padding.saturating_add(1),
     };
 
-    let content_h = clock_h.saturating_add(date_h) + if cfg.view == View::Date && show_date { 1 } else { 0 };
-    let y0 = my as i32 + ah.saturating_sub(content_h) as i32 / 2;
+    let bm = match cfg.view {
+        View::Date | View::Icon => Vec::new(),
+        view => bitmap(view, s.time),
+    };
+    let (cols, rows) = (bm.first().map_or(0, Vec::len) as u16, bm.len() as u16);
+    let (bx, by) = block_size(cfg, (cols, rows), (aw, ah.saturating_sub(date_h)));
+    let (bx, by) = (bx.min(w), by.min(h));
+    let (clock_w, clock_h) = match cfg.view {
+        View::Date => (0, 0),
+        View::Icon => (s.time.chars().count() as u16, 1),
+        _ => (
+            cols.saturating_mul(bx)
+                .saturating_add(cols.saturating_sub(1).saturating_mul(cfg.padding.0)),
+            rows.saturating_mul(by)
+                .saturating_add(rows.saturating_sub(1).saturating_mul(cfg.padding.1)),
+        ),
+    };
+
+    let y0 = my as i32 + ah.saturating_sub(clock_h.saturating_add(date_h)) as i32 / 2;
     let x0 = mx as i32 + aw.saturating_sub(clock_w) as i32 / 2;
-    draw(&mut g, x0, y0);
-    if show_date {
-        let dw = s.date.chars().count() as i32;
-        let dy = y0 + if cfg.view == View::Date { 0 } else { clock_h as i32 + cfg.date_padding as i32 };
-        if dy < area_h as i32 {
-            g.text_at((w as i32 - dw) / 2, dy, s.date, cfg.style(Target::Date));
+    match cfg.view {
+        View::Date => {}
+        View::Icon => {
+            g.text_at(x0, y0, s.time, cfg.style(Target::ActiveFg));
         }
+        _ => draw_bitmap(&mut g, cfg, &bm, (bx, by), x0, y0),
+    }
+    let dy = y0 + clock_h as i32 + date_h as i32 - 1;
+    if show_date && dy < area_h as i32 {
+        let dw = s.date.chars().count() as i32;
+        g.text_at((w as i32 - dw) / 2, dy, s.date, cfg.style(Target::Date));
     }
     g
 }
@@ -180,7 +209,11 @@ fn draw_bitmap(g: &mut Grid, cfg: &Config, bm: &[Vec<Px>], (bx, by): (u16, u16),
             }
             for dy in 0..by as i32 {
                 for dx in 0..bx as i32 {
-                    let ch = if chars.is_empty() { ' ' } else { chars[dx as usize % chars.len()] };
+                    let ch = if chars.is_empty() {
+                        ' '
+                    } else {
+                        chars[dx as usize % chars.len()]
+                    };
                     g.put(cx + dx, cy + dy, ch, cfg.style(fg), cfg.style(bg));
                 }
             }
@@ -201,7 +234,12 @@ fn draw_bottom(g: &mut Grid, s: &Scene, y: i32) {
         }
         Bottom::Idle if cfg.on(Toggle::Banner) => {
             let len = (BANNER.0.chars().count() + BANNER.1.chars().count()) as i32;
-            let x = g.text_at((g.w as i32 - len) / 2, y, BANNER.0, cfg.style(Target::ActiveFg));
+            let x = g.text_at(
+                (g.w as i32 - len) / 2,
+                y,
+                BANNER.0,
+                cfg.style(Target::ActiveFg),
+            );
             g.text_at(x, y, BANNER.1, cfg.style(Target::Banner));
         }
         Bottom::Idle => {}
@@ -213,18 +251,33 @@ fn draw_panel(g: &mut Grid, cfg: &Config, panel: &Panel, top: i32, ph: u16) {
     match *panel {
         Panel::Off => {}
         Panel::Message(msg) => {
-            g.text_at((g.w as i32 - msg.chars().count() as i32) / 2, top + ph as i32 / 2, msg, st);
+            g.text_at(
+                (g.w as i32 - msg.chars().count() as i32) / 2,
+                top + ph as i32 / 2,
+                msg,
+                st,
+            );
         }
         Panel::Bars(bars) if !bars.is_empty() && ph > 0 => {
             let fill: Vec<char> = cfg.fill_cava.chars().collect();
-            let full = |dx: usize| if fill.is_empty() { '█' } else { fill[dx % fill.len()] };
+            let full = |dx: usize| {
+                if fill.is_empty() {
+                    '█'
+                } else {
+                    fill[dx % fill.len()]
+                }
+            };
             let n = bars.len();
             let w = g.w as usize;
             let bw = (w / n).max(1);
             let used = if w >= n { bw * n } else { w };
             let off = (w - used) / 2;
             for x in 0..used {
-                let (i, dx) = if w >= n { (x / bw, x % bw) } else { (x * n / w, 0) };
+                let (i, dx) = if w >= n {
+                    (x / bw, x % bw)
+                } else {
+                    (x * n / w, 0)
+                };
                 if bw >= 2 && dx == bw - 1 {
                     continue;
                 }
@@ -233,7 +286,13 @@ fn draw_panel(g: &mut Grid, cfg: &Config, panel: &Panel, top: i32, ph: u16) {
                     let level = eighths.saturating_sub(r * 8);
                     let ch = if level >= 8 { full(dx) } else { EIGHTHS[level] };
                     if ch != ' ' {
-                        g.put((off + x) as i32, top + ph as i32 - 1 - r as i32, ch, st, Style::default());
+                        g.put(
+                            (off + x) as i32,
+                            top + ph as i32 - 1 - r as i32,
+                            ch,
+                            st,
+                            Style::default(),
+                        );
                     }
                 }
             }
@@ -256,14 +315,31 @@ mod tests {
     }
 
     fn scene<'a>(c: &'a Config, time: &'a str, date: &'a str) -> Scene<'a> {
-        Scene { cfg: c, time, date, bottom: Bottom::Idle, panel: Panel::Off }
+        Scene {
+            cfg: c,
+            time,
+            date,
+            bottom: Bottom::Idle,
+            panel: Panel::Off,
+        }
     }
 
     #[test]
     fn ascii_view_frame() {
-        let c = cfg(&["view ascii", "set auto-size off", "block 1 1", "padding 0 0", "margin 0 0", "fill-inactive '.'", "set banner off"]);
+        let c = cfg(&[
+            "view ascii",
+            "set auto-size off",
+            "block 1 1",
+            "padding 0 0",
+            "margin 0 0",
+            "fill-inactive '.'",
+            "set banner off",
+        ]);
         let g = render(&scene(&c, "1:2", "Mon"), 9, 8);
-        assert_eq!(g.text(), ".█.   ███\n██. █ ..█\n.█.   ███\n.█. █ █..\n███   ███\n\n   Mon\n");
+        assert_eq!(
+            g.text(),
+            ".█.   ███\n██. █ ..█\n.█.   ███\n.█. █ █..\n███   ███\n\n   Mon\n"
+        );
     }
 
     #[test]
@@ -276,7 +352,10 @@ mod tests {
     #[test]
     fn date_view_shows_only_date() {
         let c = cfg(&["view date", "set banner off"]);
-        assert_eq!(render(&scene(&c, "12:00", "Tue Sep 29"), 12, 4).text(), "\n Tue Sep 29\n\n");
+        assert_eq!(
+            render(&scene(&c, "12:00", "Tue Sep 29"), 12, 4).text(),
+            "\n Tue Sep 29\n\n"
+        );
     }
 
     #[test]
@@ -326,7 +405,13 @@ mod tests {
         for view in ["digital", "ascii", "binary", "date", "icon"] {
             let v = format!("view {view}");
             let normal = cfg(&[&v, "margin 3 3", "date-padding 9"]);
-            let huge = cfg(&[&v, "set auto-size off", "block 65535 65535", "padding 65535 65535", "date-padding 65535"]);
+            let huge = cfg(&[
+                &v,
+                "set auto-size off",
+                "block 65535 65535",
+                "padding 65535 65535",
+                "date-padding 65535",
+            ]);
             for c in [&normal, &huge] {
                 for (w, h) in [(0, 0), (1, 1), (2, 3), (5, 40), (80, 24), (400, 120)] {
                     let mut s = scene(c, "12:34:56", "Tue Sep 29 2026");

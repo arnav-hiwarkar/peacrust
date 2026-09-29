@@ -42,7 +42,7 @@ Top to bottom: clock area (clock + date, centered), cava panel (when on), bottom
 
 The bottom line shows the prompt when open, else a status message for `rate-status` ms, else the banner `peacrust · created by Hiwarkar` (when on).
 
-Block geometry, per view that draws blocks: `block x y` sets each pixel's size in cells, `padding x y` sets the gap between pixels, `margin x y` reserves space around the clock. `auto-size` picks the largest block that fits the clock area. `auto-ratio` picks the largest block whose width:height equals `ratio x y`. Auto-ratio wins over auto-size, and both override `block`. Blocks are never smaller than 1x1. When the clock doesn't fit, it is clipped, never panics.
+Defaults are auto-ratio on with ratio 2 1, which gives square pixels since a terminal cell is about twice as tall as wide. Block geometry, per view that draws blocks: `block x y` sets each pixel's size in cells, `padding x y` sets the gap between pixels, `margin x y` reserves space around the clock. `auto-size` picks the largest block that fits the clock area. `auto-ratio` picks the largest block whose width:height equals `ratio x y`. Auto-ratio wins over auto-size, and both override `block`. Blocks are never smaller than 1x1. When the clock doesn't fit, it is clipped, never panics.
 
 ## Keybindings
 
@@ -127,7 +127,7 @@ Unknown flags print an error and exit 2.
 
 ## cava
 
-When the `cava` toggle is on, peacrust starts `cava -p <tempfile>` with raw ASCII output to stdout, reads bar heights on a background thread and draws them as vertical bars (`▁▂▃▄▅▆▇█`) in a panel `cava-height` rows tall. The child is killed and the temp file deleted when the panel is turned off or peacrust exits. If cava is missing, the panel reads `cava not found · run peacrust --install-cava`. If cava exits, the panel reads `cava exited`.
+When the `cava` toggle is on, peacrust starts `cava -p <tempfile>` with raw ASCII output to stdout, reads bar heights on a background thread and draws them as vertical bars (`▁▂▃▄▅▆▇█`) in a panel `cava-height` rows tall. The child is killed and the temp file deleted when the panel is turned off or peacrust exits. The generated cava config keeps the `[input]` section of the user's `~/.config/cava/config`. Without one, macOS falls back to portaudio. If cava is missing, the panel reads `cava not found · run peacrust --install-cava`. If cava exits, the panel reads `cava exited: <cava's last stderr line>`.
 
 `--install-cava` and `install.sh` detect `brew`, `apt-get`, `dnf`, `pacman`, `zypper` or `apk`, print the exact command and ask `y/N` before running it. They never run `sudo` silently.
 
